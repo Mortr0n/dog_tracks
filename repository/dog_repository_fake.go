@@ -66,7 +66,7 @@ func (dr DogRepositoryFake) CreateDog(dog object.Dog) (int, error) {
 
 func (dr DogRepositoryFake) UpdateDog(id int, dog object.Dog) (object.Dog, error) {
 	if dr.UpdateDogFunc != nil {
-		return dr.UpdateDog(id, dog)
+		return dr.UpdateDogFunc(id, dog)
 	}
 
 	_, exists := dr.DogMap[id]

@@ -9,6 +9,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 )
 
@@ -131,20 +132,7 @@ func TestMalformedBodyAddDogHandler(t *testing.T) {
 }
 
 func TestRepositoryFailureAddDogHandler(t *testing.T) {
-	dog := object.Dog{
-		ID:   0,
-		Name: "Fenrir",
-		Age:  1,
-	}
-
 	testRunBool := false
-
-	dogByte, err := json.Marshal(dog)
-	if err != nil {
-		t.Fatalf("unable to convert dog to bytes err: %v", err)
-	}
-
-	body := bytes.NewReader(dogByte)
 
 	repository := repository.NewDogRepositoryFake()
 	repository.CreateDogFunc = func(dog object.Dog) (int, error) {
@@ -154,6 +142,19 @@ func TestRepositoryFailureAddDogHandler(t *testing.T) {
 
 	service := service.NewDogService(repository)
 	handler := NewDogHandler(service)
+
+	dog := object.Dog{
+		ID:   0,
+		Name: "Fenrir",
+		Age:  1,
+	}
+
+	dogByte, err := json.Marshal(dog)
+	if err != nil {
+		t.Fatalf("unable to convert dog to bytes err: %v", err)
+	}
+
+	body := bytes.NewReader(dogByte)
 
 	recorder := httptest.NewRecorder()
 	request := httptest.NewRequest("POST", "/api/dog", body)
@@ -179,5 +180,140 @@ func TestRepositoryFailureAddDogHandler(t *testing.T) {
 
 	if response.Error != "unable to create dog using {ID:0 Name:Fenrir Age:1}, err: storage unavailable" {
 		t.Errorf("%v", response.Error)
+	}
+}
+
+func TestUpdateDogHandler(t *testing.T) {
+	r := repository.NewDogRepositoryFake()
+	s := service.NewDogService(r)
+	h := NewDogHandler(s)
+
+	dogUpdate := object.Dog{
+		ID:   1,
+		Name: "Fenrir",
+		Age:  1,
+	}
+
+	bodyBytes, err := json.Marshal(dogUpdate)
+	if err != nil {
+		t.Fatalf("unable to process dog bytes from object %+v, err: %v", dogUpdate, err)
+	}
+
+	bodyBytesReader := bytes.NewReader(bodyBytes)
+
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest("PATCH", "/api/dog/{id}", bodyBytesReader)
+	idString := strconv.Itoa(dogUpdate.ID)
+	request.SetPathValue("id", idString)
+
+	h.UpdateDogHandler(recorder, request)
+
+	if recorder.Code != http.StatusOK {
+		t.Errorf("invalid http response got %v, expected %v", recorder.Code, http.StatusOK)
+	}
+
+	var response object.SuccessResponse
+	if err := json.NewDecoder(recorder.Body).Decode(&response); err != nil {
+		t.Errorf("unable to decode response err %v", err)
+	}
+
+	if response.Status != http.StatusOK {
+		t.Errorf("invalid response status: got %v, expected %v", response.Status, http.StatusOK)
+	}
+
+	updatedDog, err := s.GetDogByID(dogUpdate.ID)
+	if err != nil {
+		t.Fatalf("unable to get dog at ID: %v, err: %v", dogUpdate.ID, err)
+	}
+
+	if updatedDog.ID != dogUpdate.ID || updatedDog.Age != dogUpdate.Age || updatedDog.Name != dogUpdate.Name {
+		t.Fatalf("after updated expected %+v, got %+v", dogUpdate, updatedDog)
+	}
+
+}
+
+func TestMalformedBodyUpdateDogHandler(t *testing.T) {
+	r := repository.NewDogRepositoryFake()
+	s := service.NewDogService(r)
+	h := NewDogHandler(s)
+
+	invalidDog := `{"Name:"`
+	invalidDogReader := bytes.NewReader([]byte(invalidDog))
+
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest("PATCH", "/api/dog/{id}", invalidDogReader)
+	request.SetPathValue("id", "1")
+
+	h.UpdateDogHandler(recorder, request)
+
+	if recorder.Code != http.StatusBadRequest {
+		t.Errorf("invalid http status code, expected %v, got %v", http.StatusInternalServerError, recorder.Code)
+	}
+
+	var response object.ErrorResponse
+	if err := json.NewDecoder(recorder.Body).Decode(&response); err != nil {
+		t.Fatalf("unable to decode response body got %+v, err: %v", recorder.Body, err)
+	}
+
+	if response.Status != http.StatusBadRequest {
+		t.Errorf("unexpected status, got %v, expected %v", response.Status, http.StatusInternalServerError)
+	}
+
+	expectedError := "invalid dog object body provided err: unexpected EOF"
+	if response.Error != expectedError {
+		t.Errorf("Invalid error: got: %v, expected %v", response.Error, expectedError)
+	}
+}
+
+func TestRepositoryFailureUpdateDogHandler(t *testing.T) {
+	r := repository.NewDogRepositoryFake()
+	testRan := false
+	dog := object.Dog{
+		ID:   0,
+		Name: "NA",
+		Age:  0,
+	}
+	r.UpdateDogFunc = func(id int, dog object.Dog) (object.Dog, error) {
+		testRan = true
+		return dog, errors.New("repository update dog failure")
+	}
+	s := service.NewDogService(r)
+	h := NewDogHandler(s)
+
+	recorder := httptest.NewRecorder()
+
+	dogBytes, err := json.Marshal(dog)
+	if err != nil {
+		t.Fatalf("unable to convert dog to bytes dog: %+v, err: %v", dog, err)
+	}
+
+	dogByteReader := bytes.NewReader(dogBytes)
+
+	request := httptest.NewRequest("PATCH", "/api/dog/{id}", dogByteReader)
+	idInt := strconv.Itoa(dog.ID)
+	request.SetPathValue("id", idInt)
+
+	h.UpdateDogHandler(recorder, request)
+
+	if !testRan {
+		t.Fatalf("update dog repository failure test never ran testRan = %v", testRan)
+	}
+
+	var response object.ErrorResponse
+	if err := json.NewDecoder(recorder.Body).Decode(&response); err != nil {
+		t.Fatalf("unable to decode response body %+v, err: %v", recorder.Body, err)
+	}
+
+	if recorder.Code != http.StatusInternalServerError {
+		t.Errorf("expected status: %v, got: %v", http.StatusInternalServerError, recorder.Code)
+	}
+
+	if response.Status != http.StatusInternalServerError {
+		t.Errorf("expected status: %v, got: %v", http.StatusInternalServerError, recorder.Code)
+	}
+
+	expectedErr := "unable to update dog using supplied values {ID:0 Name:NA Age:0} for id 0, err: repository update dog failure"
+	if response.Error != expectedErr {
+		t.Errorf("expected: %v, got: %v", expectedErr, response.Error)
 	}
 }

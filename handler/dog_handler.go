@@ -87,7 +87,7 @@ func (dh DogHandler) UpdateDogHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&dog); err != nil {
-		errMsg := fmt.Sprintf("invaled dog object body provided err: %v", err)
+		errMsg := fmt.Sprintf("invalid dog object body provided err: %v", err)
 		helper.ErrorResponse(http.StatusBadRequest, errMsg, w)
 		return
 	}
