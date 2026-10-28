@@ -7,10 +7,12 @@ import (
 )
 
 func TestGetDogByID(t *testing.T) {
+	includeDeleted := false
+
 	dogRepository := repository.NewDogRepositoryFake()
 	dogService := NewDogService(dogRepository)
 
-	dog, err := dogService.GetDogByID(1)
+	dog, err := dogService.GetDogByID(1, includeDeleted)
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
@@ -26,10 +28,12 @@ func TestGetDogByID(t *testing.T) {
 }
 
 func TestGetDogByIDNotFound(t *testing.T) {
+	includeDeleted := false
+
 	dogRepository := repository.NewDogRepositoryFake()
 	dogService := NewDogService(dogRepository)
 
-	dog, err := dogService.GetDogByID(999)
+	dog, err := dogService.GetDogByID(999, includeDeleted)
 	if err == nil {
 		t.Errorf("Expected error for non-existent dog, got nil")
 	}
@@ -39,6 +43,8 @@ func TestGetDogByIDNotFound(t *testing.T) {
 }
 
 func TestCreateDog(t *testing.T) {
+	userID := 0
+
 	dogRepository := repository.NewDogRepositoryFake()
 	dogService := NewDogService(dogRepository)
 
@@ -48,12 +54,12 @@ func TestCreateDog(t *testing.T) {
 		Age:  1,
 	}
 
-	dogId, err := dogService.CreateDog(newDog)
+	dogId, err := dogService.CreateDog(newDog, userID)
 	if err != nil {
 		t.Fatalf("unable to create dog using %+v err:%v", newDog, err)
 	}
 
-	dog, err := dogRepository.GetDogByID(dogId)
+	dog, err := dogRepository.GetDogByID(dogId, false)
 	if err != nil {
 		t.Fatalf("unable to get dog at ID: %v err: %v", dogId, err)
 	}
@@ -72,6 +78,8 @@ func TestCreateDog(t *testing.T) {
 }
 
 func TestUpdateDog(t *testing.T) {
+	userID := 0
+
 	dogRepository := repository.NewDogRepositoryFake()
 	dogService := NewDogService(dogRepository)
 
@@ -81,7 +89,7 @@ func TestUpdateDog(t *testing.T) {
 		Age:  1,
 	}
 
-	dog, err := dogService.UpdateDog(dogUpdate.ID, dogUpdate)
+	dog, err := dogService.UpdateDog(dogUpdate.ID, dogUpdate, userID)
 	if err != nil {
 		t.Fatalf("unable to update dog at ID: %v with err: %v", dogUpdate.ID, err)
 	}
@@ -95,13 +103,14 @@ func TestUpdateDogNotFound(t *testing.T) {
 	dogRepository := repository.NewDogRepositoryFake()
 	dogService := NewDogService(dogRepository)
 
+	userID := 0
 	dogUpdate := object.Dog{
 		ID:   -1,
 		Name: "Fenris",
 		Age:  1,
 	}
 
-	_, err := dogService.UpdateDog(dogUpdate.ID, dogUpdate)
+	_, err := dogService.UpdateDog(dogUpdate.ID, dogUpdate, userID)
 	if err == nil {
 		t.Fatalf("expected dog not found error")
 	}
@@ -112,16 +121,19 @@ func TestUpdateDogNotFound(t *testing.T) {
 }
 
 func TestDeleteDog(t *testing.T) {
+	includeDeleted := false
+
 	r := repository.NewDogRepositoryFake()
 	s := NewDogService(r)
 
 	dogId := 1
-	err := s.DeleteDog(dogId)
+	userID := 0
+	err := s.DeleteDog(dogId, userID)
 	if err != nil {
 		t.Fatalf("error deleting dog at ID: %v, err: %v", dogId, err)
 	}
 
-	dog, err := s.GetDogByID(1)
+	dog, err := s.GetDogByID(1, includeDeleted)
 	if err == nil {
 		t.Fatalf("dog %+v retrieved after deletion", dog)
 	}

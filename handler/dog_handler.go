@@ -37,7 +37,10 @@ func (dh DogHandler) GetDogByIDHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dog, err := dh.DogService.GetDogByID(idInt)
+	deletedPath := r.PathValue("deleted")
+	includeDeleted, _ := strconv.ParseBool(deletedPath)
+
+	dog, err := dh.DogService.GetDogByID(idInt, includeDeleted)
 	if err != nil {
 		errMsg := fmt.Sprintf("unable to get dog by id %v: err %v", idInt, err)
 		helper.ErrorResponse(http.StatusInternalServerError, errMsg, w)
@@ -57,6 +60,7 @@ func (dh DogHandler) GetDogByIDHandler(w http.ResponseWriter, r *http.Request) {
 
 func (dh DogHandler) CreateDogHandler(w http.ResponseWriter, r *http.Request) {
 	var dog object.Dog
+	userID := 0
 
 	if err := json.NewDecoder(r.Body).Decode(&dog); err != nil {
 		errMsg := fmt.Sprintf("invalid dog object body provided err: %v", err)
@@ -64,7 +68,7 @@ func (dh DogHandler) CreateDogHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dogId, err := dh.DogService.CreateDog(dog)
+	dogId, err := dh.DogService.CreateDog(dog, userID)
 	if err != nil {
 		errMsg := fmt.Sprintf("unable to create dog using %+v, err: %v", dog, err)
 		helper.ErrorResponse(http.StatusInternalServerError, errMsg, w)
@@ -77,6 +81,7 @@ func (dh DogHandler) CreateDogHandler(w http.ResponseWriter, r *http.Request) {
 
 func (dh DogHandler) UpdateDogHandler(w http.ResponseWriter, r *http.Request) {
 	var dog object.Dog
+	userID := 0
 
 	idString := r.PathValue("id")
 	id, err := strconv.Atoi(idString)
@@ -92,7 +97,7 @@ func (dh DogHandler) UpdateDogHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedDog, err := dh.DogService.UpdateDog(id, dog)
+	updatedDog, err := dh.DogService.UpdateDog(id, dog, userID)
 	if err != nil {
 		errMsg := fmt.Sprintf("unable to update dog using supplied values %+v for id %v, err: %v", dog, id, err)
 		helper.ErrorResponse(http.StatusInternalServerError, errMsg, w)
@@ -103,6 +108,7 @@ func (dh DogHandler) UpdateDogHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (dh DogHandler) DeleteDogHandler(w http.ResponseWriter, r *http.Request) {
+	userID := 0
 	idString := r.PathValue("id")
 	id, err := strconv.Atoi(idString)
 	if err != nil {
@@ -111,7 +117,7 @@ func (dh DogHandler) DeleteDogHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := dh.DogService.DeleteDog(id); err != nil {
+	if err := dh.DogService.DeleteDog(id, userID); err != nil {
 		errMsg := fmt.Sprintf("unable to delete dog at id: %v, err: %v", id, err)
 		helper.ErrorResponse(http.StatusInternalServerError, errMsg, w)
 		return

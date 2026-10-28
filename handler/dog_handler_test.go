@@ -17,7 +17,7 @@ func TestGetDogByIDHandler(t *testing.T) {
 	repository := repository.NewDogRepositoryFake()
 	receivedID := 0
 
-	repository.GetDogByIDFunc = func(id int) (*object.Dog, error) {
+	repository.GetDogByIDFunc = func(id int, includeDeleted bool) (*object.Dog, error) {
 		receivedID = id
 		return &object.Dog{ID: id, Name: "Freyja", Age: 5}, nil
 	}
@@ -87,7 +87,7 @@ func TestAddDogHandler(t *testing.T) {
 	dogResponse = response.Response
 	// t.Logf("dogResponse: %+v, response %+v", dogResponse, response)
 
-	createdDog, err := service.GetDogByID(dogResponse.ID)
+	createdDog, err := service.GetDogByID(dogResponse.ID, false)
 	if err != nil {
 		t.Fatalf("unable to get created dog by id %v err: %v", dogResponse.ID, err)
 	}
@@ -178,7 +178,7 @@ func TestRepositoryFailureAddDogHandler(t *testing.T) {
 		t.Errorf("unexpected status got %v, expected %v", response.Status, http.StatusBadRequest)
 	}
 
-	if response.Error != "unable to create dog using {ID:0 Name:Fenrir Age:1}, err: storage unavailable" {
+	if response.Error != "unable to create dog using {ID:0 Name:Fenrir Age:1 CreatedAt:0001-01-01 00:00:00 +0000 UTC CreatedBy:0 UpdatedAt:0001-01-01 00:00:00 +0000 UTC UpdatedBy:0 DeletedAt:<nil> DeletedBy:<nil>}, err: storage unavailable" {
 		t.Errorf("%v", response.Error)
 	}
 }
@@ -221,7 +221,7 @@ func TestUpdateDogHandler(t *testing.T) {
 		t.Errorf("invalid response status: got %v, expected %v", response.Status, http.StatusOK)
 	}
 
-	updatedDog, err := s.GetDogByID(dogUpdate.ID)
+	updatedDog, err := s.GetDogByID(dogUpdate.ID, false)
 	if err != nil {
 		t.Fatalf("unable to get dog at ID: %v, err: %v", dogUpdate.ID, err)
 	}
@@ -312,7 +312,7 @@ func TestRepositoryFailureUpdateDogHandler(t *testing.T) {
 		t.Errorf("expected status: %v, got: %v", http.StatusInternalServerError, recorder.Code)
 	}
 
-	expectedErr := "unable to update dog using supplied values {ID:0 Name:NA Age:0} for id 0, err: repository update dog failure"
+	expectedErr := "unable to update dog using supplied values {ID:0 Name:NA Age:0 CreatedAt:0001-01-01 00:00:00 +0000 UTC CreatedBy:0 UpdatedAt:0001-01-01 00:00:00 +0000 UTC UpdatedBy:0 DeletedAt:<nil> DeletedBy:<nil>} for id 0, err: repository update dog failure"
 	if response.Error != expectedErr {
 		t.Errorf("expected: %v, got: %v", expectedErr, response.Error)
 	}
