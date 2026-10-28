@@ -317,3 +317,32 @@ func TestRepositoryFailureUpdateDogHandler(t *testing.T) {
 		t.Errorf("expected: %v, got: %v", expectedErr, response.Error)
 	}
 }
+
+func TestDeleteDogHandler(t *testing.T) {
+	r := repository.NewDogRepositoryFake()
+	s := service.NewDogService(r)
+	h := NewDogHandler(s)
+
+	dogId := 1
+
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest("DELETE", "/api/dog/{id}", nil)
+	dogIdString := strconv.Itoa(dogId)
+	request.SetPathValue("id", dogIdString)
+
+	h.DeleteDogHandler(recorder, request)
+
+	var response object.SuccessResponse
+	if err := json.NewDecoder(recorder.Body).Decode(&response); err != nil {
+		t.Fatalf("unable to decode response body from %+v, err: %v", recorder.Body, err)
+	}
+
+	if recorder.Code != http.StatusOK || response.Status != http.StatusOK {
+		t.Errorf("invalid http status code expected: %v, got %v and %v", http.StatusOK, recorder.Code, response.Status)
+	}
+
+	validResponse := "Deleted dog at ID: 1"
+	if response.Response != validResponse {
+		t.Errorf("got: %v, expected %v", response.Response, validResponse)
+	}
+}

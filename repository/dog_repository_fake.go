@@ -89,6 +89,12 @@ func (dr DogRepositoryFake) DeleteDog(id int) error {
 		return dr.DeleteDogFunc(id)
 	}
 
+	_, exists := dr.DogMap[id]
+	if !exists {
+		errMsg := fmt.Sprintf("dog at ID: %v not found", id)
+		return errors.New(errMsg)
+	}
+
 	delete(dr.DogMap, id)
 	return nil
 }

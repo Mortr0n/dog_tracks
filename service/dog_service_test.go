@@ -110,3 +110,19 @@ func TestUpdateDogNotFound(t *testing.T) {
 		t.Fatalf("different error than expected %v", err.Error())
 	}
 }
+
+func TestDeleteDog(t *testing.T) {
+	r := repository.NewDogRepositoryFake()
+	s := NewDogService(r)
+
+	dogId := 1
+	err := s.DeleteDog(dogId)
+	if err != nil {
+		t.Fatalf("error deleting dog at ID: %v, err: %v", dogId, err)
+	}
+
+	dog, err := s.GetDogByID(1)
+	if err == nil {
+		t.Fatalf("dog %+v retrieved after deletion", dog)
+	}
+}
