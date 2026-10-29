@@ -7,64 +7,6 @@ import (
 	"time"
 )
 
-var dogTime = time.Date(2026, time.October, 28, 11, 0, 0, 0, time.UTC)
-var deleteTime = time.Date(2026, time.October, 28, 12, 0, 0, 0, time.UTC)
-var userId = 0
-
-var Freyja = object.Dog{
-	ID:        1,
-	Name:      "Freyja",
-	Age:       5,
-	CreatedAt: dogTime,
-	CreatedBy: userId,
-	UpdatedAt: dogTime,
-	UpdatedBy: userId,
-	DeletedAt: nil,
-	DeletedBy: nil,
-}
-var Fenrir = object.Dog{
-	ID:        2,
-	Name:      "Fenrir",
-	Age:       1,
-	CreatedAt: dogTime,
-	CreatedBy: userId,
-	UpdatedAt: dogTime,
-	UpdatedBy: userId,
-	DeletedAt: nil,
-	DeletedBy: nil,
-}
-
-var Badger = object.Dog{
-	ID:        3,
-	Name:      "Badger",
-	Age:       10,
-	CreatedAt: dogTime,
-	CreatedBy: userId,
-	UpdatedAt: dogTime,
-	UpdatedBy: userId,
-	DeletedAt: nil,
-	DeletedBy: nil,
-}
-
-var DeletedDog = object.Dog{
-	ID:        4,
-	Name:      "Deleter",
-	Age:       62,
-	CreatedAt: dogTime,
-	CreatedBy: userId,
-	UpdatedAt: dogTime,
-	UpdatedBy: userId,
-	DeletedAt: &deleteTime,
-	DeletedBy: &userId,
-}
-
-var dogMap = map[int]object.Dog{
-	1: Freyja,
-	2: Fenrir,
-	3: Badger,
-	4: DeletedDog,
-}
-
 type DogRepositoryFake struct {
 	DogMap         map[int]object.Dog
 	DogMapCounter  int
@@ -74,8 +16,8 @@ type DogRepositoryFake struct {
 	DeleteDogFunc  func(id int) error
 }
 
-func NewDogRepositoryFake() DogRepositoryFake {
-	return DogRepositoryFake{
+func NewDogRepositoryFake() *DogRepositoryFake {
+	return &DogRepositoryFake{
 		DogMap: map[int]object.Dog{
 			1: Freyja,
 			2: Fenrir,
@@ -115,8 +57,8 @@ func (dr DogRepositoryFake) CreateDog(dog object.Dog, userId int) (int, error) {
 	if dr.CreateDogFunc != nil {
 		return dr.CreateDogFunc(dog)
 	}
-
-	dogId := dr.DogMapCounter + 1
+	dr.DogMapCounter = dr.DogMapCounter + 1
+	dogId := dr.DogMapCounter
 	newDog := object.Dog{
 		ID:        dogId,
 		Name:      dog.Name,

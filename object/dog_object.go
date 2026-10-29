@@ -7,7 +7,7 @@ type Dog struct {
 	Name      string     `json:"name"`
 	Age       int        `json:"age"`
 	CreatedAt time.Time  `json:"createdat"`
-	CreatedBy int        `json:createdby"`
+	CreatedBy int        `json:"createdby"`
 	UpdatedAt time.Time  `json:"updatedat"`
 	UpdatedBy int        `json:"updatedby"`
 	DeletedAt *time.Time `json:"deletedat"`

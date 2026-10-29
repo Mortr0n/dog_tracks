@@ -8,3 +8,7 @@ type DogRepositoryInterface interface {
 	UpdateDog(id int, dog object.Dog, userId int) (object.Dog, error)
 	DeleteDog(id int, userId int) error
 }
+
+type TrainSessionRepositoryInterface interface {
+	GetSessionByID(id int, includeDeleted bool) (*object.Training_Session, error)
+}
