@@ -17,6 +17,9 @@ func main() {
 	dogHandler := handler.NewDogHandler(dogService)
 	dogRoute := route.NewDogRoute(dogHandler)
 
+	trainingRepository := repository.NewTrainingSessionRepositoryFake()
+	trainingService := service.NewTrainingSessionService(trainingRepository)
+
 	dogRoute.RegisterRoutes()
 
 	fmt.Println("Server starting on port " + port)

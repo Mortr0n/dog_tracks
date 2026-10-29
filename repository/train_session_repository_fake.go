@@ -24,7 +24,7 @@ var zeroSession = object.Training_Session{
 type TrainSessionRepositoryFake struct {
 	SessionMap                        map[int]object.Training_Session
 	SessionMapCounter                 int
-	GetTrainSessionByIDFunc           func(id int, includeDeleted bool) (*object.Training_Session, error)
+	GetTrainingSessionByIDFunc        func(id int, includeDeleted bool) (*object.Training_Session, error)
 	GetAllTrainingSessionsByDogIDFunc func(id int, includeDeleted bool) ([]object.Training_Session, error)
 	CreateTrainingSessionFunc         func(session object.Training_Session) (int, error)
 	UpdateTrainingSessionFunc         func(session object.Training_Session) (object.Training_Session, error)
@@ -45,8 +45,8 @@ func NewTrainingSessionRepositoryFake() *TrainSessionRepositoryFake {
 }
 
 func (ts *TrainSessionRepositoryFake) GetTrainingSessionByID(id int, includeDeleted bool) (*object.Training_Session, error) {
-	if ts.GetTrainSessionByIDFunc != nil {
-		return ts.GetTrainSessionByIDFunc(id, includeDeleted)
+	if ts.GetTrainingSessionByIDFunc != nil {
+		return ts.GetTrainingSessionByIDFunc(id, includeDeleted)
 	}
 
 	session, exists := ts.SessionMap[id]
@@ -110,4 +110,19 @@ func (ts *TrainSessionRepositoryFake) UpdateTrainingSession(session object.Train
 
 	ts.SessionMap[session.ID] = updateSession
 	return ts.SessionMap[session.ID], nil
+}
+
+func (ts *TrainSessionRepositoryFake) DeleteTrainingSession(id int, userId int) error {
+	session, exists := ts.SessionMap[id]
+	if !exists {
+		return fmt.Errorf("no session found at ID: %v", id)
+	}
+	now := time.Now()
+
+	session.DeletedAt = &now
+	session.DeletedBy = &userId
+
+	ts.SessionMap[id] = session
+
+	return nil
 }
