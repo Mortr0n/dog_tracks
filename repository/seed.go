@@ -124,7 +124,7 @@ var trainingTypeMap = map[int]object.Training_Type{
 // ! Training Session
 var recallTrain1 = object.Training_Session{
 	ID:              1,
-	DogId:           1,
+	DogID:           1,
 	TrainingTypeID:  1,
 	StartedAt:       trainTime,
 	Durationseconds: 1500,
@@ -139,7 +139,7 @@ var recallTrain1 = object.Training_Session{
 
 var recallTrain2 = object.Training_Session{
 	ID:              2,
-	DogId:           1,
+	DogID:           1,
 	TrainingTypeID:  1,
 	StartedAt:       trainTime,
 	Durationseconds: 500,
@@ -154,7 +154,7 @@ var recallTrain2 = object.Training_Session{
 
 var leaveitTrain1 = object.Training_Session{
 	ID:              3,
-	DogId:           2,
+	DogID:           2,
 	TrainingTypeID:  3,
 	StartedAt:       trainTime,
 	Durationseconds: 900,
@@ -169,7 +169,7 @@ var leaveitTrain1 = object.Training_Session{
 
 var looseLeashTrain1 = object.Training_Session{
 	ID:              4,
-	DogId:           3,
+	DogID:           3,
 	TrainingTypeID:  2,
 	StartedAt:       trainTime,
 	Durationseconds: 1500,
@@ -184,7 +184,7 @@ var looseLeashTrain1 = object.Training_Session{
 
 var looseLeashTrain2 = object.Training_Session{
 	ID:              5,
-	DogId:           3,
+	DogID:           3,
 	TrainingTypeID:  2,
 	StartedAt:       trainTime,
 	Durationseconds: 900,
@@ -199,7 +199,7 @@ var looseLeashTrain2 = object.Training_Session{
 
 var looseLeashTrain3 = object.Training_Session{
 	ID:              6,
-	DogId:           2,
+	DogID:           2,
 	TrainingTypeID:  2,
 	StartedAt:       trainTime,
 	Durationseconds: 1500,

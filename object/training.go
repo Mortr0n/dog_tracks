@@ -16,7 +16,7 @@ type Training_Type struct {
 
 type Training_Session struct {
 	ID              int        `json:"id"`
-	DogId           int        `json:"dogid"`
+	DogID           int        `json:"dogid"`
 	TrainingTypeID  int        `json:"trainingtypeid"`
 	StartedAt       time.Time  `json:"startedat"`
 	Durationseconds int        `json:"duration"`

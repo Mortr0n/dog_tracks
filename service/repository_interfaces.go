@@ -14,5 +14,5 @@ type TrainSessionRepositoryInterface interface {
 	GetAllTrainingSessionsByDogID(id int, includeDeleted bool) ([]object.Training_Session, error)
 	CreateTrainingSession(session object.Training_Session) (int, error)
 	UpdateTrainingSession(session object.Training_Session) (object.Training_Session, error)
-	DeleteTrainingSession(id int, userID int) error
+	DeleteTrainingSession(id int) error
 }

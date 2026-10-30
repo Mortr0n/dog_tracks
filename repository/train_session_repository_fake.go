@@ -8,7 +8,7 @@ import (
 
 var zeroSession = object.Training_Session{
 	ID:              0,
-	DogId:           0,
+	DogID:           0,
 	TrainingTypeID:  0,
 	StartedAt:       time.Time{},
 	Durationseconds: 0,
@@ -51,7 +51,7 @@ func (ts *TrainSessionRepositoryFake) GetTrainingSessionByID(id int, includeDele
 
 	session, exists := ts.SessionMap[id]
 	if !exists {
-		return &zeroSession, fmt.Errorf("session not found at id: %v", id)
+		return nil, fmt.Errorf("session not found at id: %v", id)
 	}
 
 	return &session, nil
@@ -65,7 +65,7 @@ func (ts *TrainSessionRepositoryFake) GetAllTrainingSessionsByDogID(id int, incl
 	var sessions []object.Training_Session
 
 	for _, session := range ts.SessionMap {
-		if session.DogId == id {
+		if session.DogID == id {
 			sessions = append(sessions, session)
 		}
 	}
@@ -100,7 +100,7 @@ func (ts *TrainSessionRepositoryFake) UpdateTrainingSession(session object.Train
 		return zeroSession, fmt.Errorf("no session at ID: %v", session.ID)
 	}
 
-	updateSession.DogId = session.DogId
+	updateSession.DogID = session.DogID
 	updateSession.Durationseconds = session.Durationseconds
 	updateSession.Notes = session.Notes
 	updateSession.StartedAt = session.StartedAt
@@ -112,7 +112,10 @@ func (ts *TrainSessionRepositoryFake) UpdateTrainingSession(session object.Train
 	return ts.SessionMap[session.ID], nil
 }
 
-func (ts *TrainSessionRepositoryFake) DeleteTrainingSession(id int, userId int) error {
+func (ts *TrainSessionRepositoryFake) DeleteTrainingSession(id int) error {
+	// once we have user service we can grab user IDs
+	userID := 0
+
 	session, exists := ts.SessionMap[id]
 	if !exists {
 		return fmt.Errorf("no session found at ID: %v", id)
@@ -120,7 +123,7 @@ func (ts *TrainSessionRepositoryFake) DeleteTrainingSession(id int, userId int) 
 	now := time.Now()
 
 	session.DeletedAt = &now
-	session.DeletedBy = &userId
+	session.DeletedBy = &userID
 
 	ts.SessionMap[id] = session
 
