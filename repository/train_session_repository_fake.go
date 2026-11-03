@@ -35,12 +35,12 @@ func NewTrainingSessionRepositoryFake() *TrainSessionRepositoryFake {
 		SessionMap: map[int]object.Training_Session{
 			1: recallTrain1,
 			2: recallTrain2,
-			3: looseLeashTrain1,
-			4: looseLeashTrain3,
+			3: leaveitTrain1,
+			4: looseLeashTrain1,
 			5: looseLeashTrain2,
-			6: leaveitTrain1,
+			6: looseLeashTrain3,
 		},
-		SessionMapCounter: 4,
+		SessionMapCounter: 6,
 	}
 }
 
@@ -53,7 +53,11 @@ func (ts *TrainSessionRepositoryFake) GetTrainingSessionByID(id int, includeDele
 	if !exists {
 		return nil, fmt.Errorf("session not found at id: %v", id)
 	}
-
+	if !includeDeleted {
+		if session.DeletedAt != nil {
+			return nil, fmt.Errorf("no non-deleted session found at ID: %v", id)
+		}
+	}
 	return &session, nil
 }
 
@@ -65,8 +69,15 @@ func (ts *TrainSessionRepositoryFake) GetAllTrainingSessionsByDogID(id int, incl
 	var sessions []object.Training_Session
 
 	for _, session := range ts.SessionMap {
-		if session.DogID == id {
-			sessions = append(sessions, session)
+		if includeDeleted {
+			if session.DogID == id {
+				sessions = append(sessions, session)
+			}
+		}
+		if !includeDeleted {
+			if session.DogID == id && session.DeletedAt == nil {
+				sessions = append(sessions, session)
+			}
 		}
 	}
 
@@ -85,8 +96,10 @@ func (ts *TrainSessionRepositoryFake) CreateTrainingSession(session object.Train
 	ts.SessionMapCounter = ts.SessionMapCounter + 1
 	session.ID = ts.SessionMapCounter
 
-	ts.SessionMap[session.ID] = session
+	session.CreatedAt = time.Now()
+	session.UpdatedAt = time.Now()
 
+	ts.SessionMap[session.ID] = session
 	return session.ID, nil
 }
 
@@ -106,15 +119,13 @@ func (ts *TrainSessionRepositoryFake) UpdateTrainingSession(session object.Train
 	updateSession.StartedAt = session.StartedAt
 	updateSession.TrainingTypeID = session.TrainingTypeID
 	updateSession.UpdatedAt = time.Now()
-	updateSession.UpdatedBy = session.UpdatedBy
 
 	ts.SessionMap[session.ID] = updateSession
 	return ts.SessionMap[session.ID], nil
 }
 
-func (ts *TrainSessionRepositoryFake) DeleteTrainingSession(id int) error {
+func (ts *TrainSessionRepositoryFake) DeleteTrainingSession(id int, userID int) error {
 	// once we have user service we can grab user IDs
-	userID := 0
 
 	session, exists := ts.SessionMap[id]
 	if !exists {

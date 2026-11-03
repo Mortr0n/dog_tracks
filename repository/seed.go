@@ -215,8 +215,8 @@ var looseLeashTrain3 = object.Training_Session{
 var TrainingSessionMap = map[int]object.Training_Session{
 	1: recallTrain1,
 	2: recallTrain2,
-	3: looseLeashTrain1,
-	4: looseLeashTrain3,
+	3: leaveitTrain1,
+	4: looseLeashTrain1,
 	5: looseLeashTrain2,
-	6: leaveitTrain1,
+	6: looseLeashTrain3,
 }

@@ -4,6 +4,8 @@ import (
 	"dog_tracks/object"
 )
 
+var userID = 0
+
 type TrainingService struct {
 	TrainingSessionRepository TrainSessionRepositoryInterface
 }
@@ -23,13 +25,16 @@ func (ts TrainingService) GetAllTrainingSessionsByDogID(id int, includeDeleted b
 }
 
 func (ts TrainingService) CreateTrainingSession(session object.Training_Session) (int, error) {
+	session.CreatedBy = userID
+	session.UpdatedBy = userID
 	return ts.TrainingSessionRepository.CreateTrainingSession(session)
 }
 
 func (ts TrainingService) UpdateTrainingSession(session object.Training_Session) (object.Training_Session, error) {
+	session.UpdatedBy = userID
 	return ts.TrainingSessionRepository.UpdateTrainingSession(session)
 }
 
 func (ts TrainingService) DeleteTrainingSession(id int) error {
-	return ts.TrainingSessionRepository.DeleteTrainingSession(id)
+	return ts.TrainingSessionRepository.DeleteTrainingSession(id, userID)
 }
