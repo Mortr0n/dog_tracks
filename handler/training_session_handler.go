@@ -46,13 +46,14 @@ func (th TrainingSessionHandler) GetTrainingSessionByIDHandler(w http.ResponseWr
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
+	helper.SuccessResponse(http.StatusOK, session, w)
+	// w.WriteHeader(http.StatusOK)
+	// w.Header().Set("Content-Type", "application/json")
 
-	if err := json.NewEncoder(w).Encode(session); err != nil {
-		errMsg := fmt.Sprintf("unable to write training session response from session: %+v, err: %v", session, err)
-		helper.ErrorResponse(http.StatusInternalServerError, errMsg, w)
-	}
+	// if err := json.NewEncoder(w).Encode(session); err != nil {
+	// 	errMsg := fmt.Sprintf("unable to write training session response from session: %+v, err: %v", session, err)
+	// 	helper.ErrorResponse(http.StatusInternalServerError, errMsg, w)
+	// }
 
 }
 
@@ -77,13 +78,11 @@ func (th TrainingSessionHandler) GetAllTrainingSessionsByDogIDHandler(w http.Res
 	}
 
 	if len(sessions) < 1 {
-		errMsg := fmt.Sprintf("no sessions returned for dog ID: %v", id)
-		helper.ErrorResponse(http.StatusOK, errMsg, w)
-		return
+		helper.SuccessResponse(http.StatusOK, sessions, w)
 	}
 
-	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(sessions); err != nil {
 		errMsg := fmt.Sprintf("unable to write session response err: %v", err)
@@ -106,22 +105,6 @@ func (th TrainingSessionHandler) CreateTrainingSessionHandler(w http.ResponseWri
 		helper.ErrorResponse(http.StatusInternalServerError, errMsg, w)
 		return
 	}
-
-	// session, err := th.TrainingService.GetTrainingSessionByID(id, false)
-	// if err != nil {
-	// 	errMsg := fmt.Sprintf("unable to find created training session at ID: %v, err: %v", id, err)
-	// 	helper.ErrorResponse(http.StatusInternalServerError, errMsg, w)
-	// 	return
-	// }
-
-	// if session == nil {
-	// 	errMsg := fmt.Sprintf("invalid session body returned from created ID: %v", id)
-	// 	helper.ErrorResponse(http.StatusInternalServerError, errMsg, w)
-	// 	return
-	// }
-
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "applicatiion/json")
 
 	helper.SuccessResponse(http.StatusOK, id, w)
 }

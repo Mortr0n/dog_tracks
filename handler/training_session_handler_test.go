@@ -8,9 +8,9 @@ import (
 	"dog_tracks/service"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/http/httptest"
 	"reflect"
-	"strconv"
 	"testing"
 	"time"
 )
@@ -55,6 +55,23 @@ func TestGetTrainingSessionByIDHandler(t *testing.T) {
 
 	h.GetTrainingSessionByIDHandler(recorder, request)
 
+	expectedStatus := http.StatusOK
+	if recorder.Code != expectedStatus {
+		t.Errorf("http status expected: %v, got %v", expectedStatus, recorder.Code)
+	}
+
+	var response struct {
+		Status   int
+		Response object.Training_Session
+	}
+	if err := json.NewDecoder(recorder.Body).Decode(&response); err != nil {
+		t.Fatalf("invalid response returned for request err: %v", err)
+	}
+
+	if response.Status != expectedStatus {
+		t.Errorf("http status expected: %v, got %v", expectedStatus, response.Status)
+	}
+
 	if receivedID != 1 {
 		t.Errorf("expected received ID = 1 got ID: %v", receivedID)
 	}
@@ -64,14 +81,10 @@ func TestGetTrainingSessionByIDHandler(t *testing.T) {
 		t.Errorf("expected application/json content-type, got: %v", contentType)
 	}
 
-	var ts object.Training_Session
-	if err := json.NewDecoder(recorder.Body).Decode(&ts); err != nil {
-		t.Fatalf("unable to decode request err: %v", err)
-	}
+	ts := &response.Response
 
-	es := *expectedSession
-	if !reflect.DeepEqual(ts, es) {
-		helper.ObjectCheckFormatter(t, ts, es)
+	if !reflect.DeepEqual(ts, expectedSession) {
+		helper.ObjectCheckFormatter(t, expectedSession, ts)
 	}
 }
 
@@ -120,8 +133,8 @@ func TestGetAllTrainingSessionsByDogIDHandler(t *testing.T) {
 	s := service.NewTrainingSessionService(r)
 	h := NewTrainingSessionHandler(s)
 
-	idString := strconv.Itoa(receivedID)
-	deletedString := strconv.FormatBool(deletedIncl)
+	idString := "1"
+	deletedString := "true"
 	targetString := fmt.Sprintf("/api/sessions/%v/%v", idString, deletedString)
 
 	recorder := httptest.NewRecorder()
@@ -131,6 +144,19 @@ func TestGetAllTrainingSessionsByDogIDHandler(t *testing.T) {
 	request.SetPathValue("deleted", deletedString)
 
 	h.GetAllTrainingSessionsByDogIDHandler(recorder, request)
+
+	expectedStatus := http.StatusOK
+	if recorder.Code != expectedStatus {
+		t.Errorf("http status expected: %v, got %v", expectedStatus, recorder.Code)
+	}
+
+	if receivedID != 1 {
+		t.Fatalf("received ID got: %v, expected %v", receivedID, idString)
+	}
+
+	if deletedIncl != true {
+		t.Fatalf("deleted inclusion got: %v, expected: %v", deletedIncl, true)
+	}
 
 	var sessions []object.Training_Session
 	if err := json.NewDecoder(recorder.Body).Decode(&sessions); err != nil {
@@ -178,6 +204,11 @@ func TestCreateTrainingSessionHandler(t *testing.T) {
 	before := time.Now()
 	h.CreateTrainingSessionHandler(recorder, request)
 	after := time.Now()
+
+	expectedStatus := http.StatusOK
+	if recorder.Code != expectedStatus {
+		t.Errorf("http status expected: %v, got %v", expectedStatus, recorder.Code)
+	}
 
 	var response struct {
 		Response int

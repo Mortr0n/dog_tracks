@@ -31,8 +31,8 @@ func TestGetTrainingSessionById(t *testing.T) {
 		CreatedBy:       userId,
 		UpdatedAt:       dogTime,
 		UpdatedBy:       userId,
-		DeletedAt:       &deleteTime,
-		DeletedBy:       &userId,
+		DeletedAt:       nil,
+		DeletedBy:       nil,
 	}
 
 	r := repository.NewTrainingSessionRepositoryFake()
