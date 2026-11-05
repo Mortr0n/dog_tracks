@@ -32,7 +32,7 @@ func (dh DogHandler) GetDogByIDHandler(w http.ResponseWriter, r *http.Request) {
 	idString := r.PathValue("id")
 	idInt, err := strconv.Atoi(idString)
 	if err != nil {
-		errMsg := fmt.Sprintf("Unable to convert id %v to string: err %v", idString, err)
+		errMsg := fmt.Sprintf("unable to convert id %v to int: err %v", idString, err)
 		helper.ErrorResponse(http.StatusBadRequest, errMsg, w)
 		return
 	}

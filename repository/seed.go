@@ -74,8 +74,8 @@ var recall = object.Training_Type{
 	CreatedBy:   userId,
 	UpdatedAt:   dogTime,
 	UpdatedBy:   userId,
-	DeletedAt:   &deleteTime,
-	DeletedBy:   &userId,
+	DeletedAt:   nil,
+	DeletedBy:   nil,
 }
 
 var looseLeash = object.Training_Type{
@@ -86,8 +86,8 @@ var looseLeash = object.Training_Type{
 	CreatedBy:   userId,
 	UpdatedAt:   dogTime,
 	UpdatedBy:   userId,
-	DeletedAt:   &deleteTime,
-	DeletedBy:   &userId,
+	DeletedAt:   nil,
+	DeletedBy:   nil,
 }
 
 var leaveIt = object.Training_Type{
@@ -98,8 +98,8 @@ var leaveIt = object.Training_Type{
 	CreatedBy:   userId,
 	UpdatedAt:   dogTime,
 	UpdatedBy:   userId,
-	DeletedAt:   &deleteTime,
-	DeletedBy:   &userId,
+	DeletedAt:   nil,
+	DeletedBy:   nil,
 }
 
 var stay = object.Training_Type{
@@ -110,8 +110,8 @@ var stay = object.Training_Type{
 	CreatedBy:   userId,
 	UpdatedAt:   dogTime,
 	UpdatedBy:   userId,
-	DeletedAt:   &deleteTime,
-	DeletedBy:   &userId,
+	DeletedAt:   nil,
+	DeletedBy:   nil,
 }
 
 var trainingTypeMap = map[int]object.Training_Type{
@@ -133,8 +133,8 @@ var recallTrain1 = object.Training_Session{
 	CreatedBy:       userId,
 	UpdatedAt:       dogTime,
 	UpdatedBy:       userId,
-	DeletedAt:       &deleteTime,
-	DeletedBy:       &userId,
+	DeletedAt:       nil,
+	DeletedBy:       nil,
 }
 
 var recallTrain2 = object.Training_Session{
@@ -148,8 +148,8 @@ var recallTrain2 = object.Training_Session{
 	CreatedBy:       userId,
 	UpdatedAt:       dogTime,
 	UpdatedBy:       userId,
-	DeletedAt:       &deleteTime,
-	DeletedBy:       &userId,
+	DeletedAt:       nil,
+	DeletedBy:       nil,
 }
 
 var leaveitTrain1 = object.Training_Session{

@@ -15,11 +15,12 @@ func main() {
 	dogRepository := repository.NewDogRepositoryFake()
 	dogService := service.NewDogService(dogRepository)
 	dogHandler := handler.NewDogHandler(dogService)
-	dogRoute := route.NewDogRoute(dogHandler)
 
 	trainingRepository := repository.NewTrainingSessionRepositoryFake()
 	trainingService := service.NewTrainingSessionService(trainingRepository)
+	th := handler.NewTrainingSessionHandler(trainingService)
 
+	dogRoute := route.NewDogRoute(dogHandler, th)
 	dogRoute.RegisterRoutes()
 
 	fmt.Println("Server starting on port " + port)
