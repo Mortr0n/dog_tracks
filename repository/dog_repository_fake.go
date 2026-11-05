@@ -12,7 +12,7 @@ type DogRepositoryFake struct {
 	DogMapCounter  int
 	GetDogByIDFunc func(id int, includeDeleted bool) (*object.Dog, error)
 	CreateDogFunc  func(dog object.Dog) (int, error)
-	UpdateDogFunc  func(id int, dog object.Dog) (object.Dog, error)
+	UpdateDogFunc  func(dog object.Dog) (object.Dog, error)
 	DeleteDogFunc  func(id int) error
 }
 
@@ -73,11 +73,12 @@ func (dr DogRepositoryFake) CreateDog(dog object.Dog, userId int) (int, error) {
 	return newDog.ID, nil
 }
 
-func (dr DogRepositoryFake) UpdateDog(id int, dog object.Dog, userId int) (object.Dog, error) {
+func (dr DogRepositoryFake) UpdateDog(dog object.Dog, userId int) (object.Dog, error) {
 	if dr.UpdateDogFunc != nil {
-		return dr.UpdateDogFunc(id, dog)
+		return dr.UpdateDogFunc(dog)
 	}
 
+	id := dog.ID
 	_, exists := dr.DogMap[id]
 	if !exists {
 		errMsg := fmt.Sprintf("dog at ID: %v not found", id)

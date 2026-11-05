@@ -26,4 +26,6 @@ func (dr Route) RegisterRoutes() {
 	http.HandleFunc("GET /api/trainingsession/{id}/{deleted}", dr.TrainingSessionHandler.GetTrainingSessionByIDHandler)
 	http.HandleFunc("GET /api/trainingsessions/{id}/{deleted}", dr.TrainingSessionHandler.GetAllTrainingSessionsByDogIDHandler)
 	http.HandleFunc("POST /api/trainingsession", dr.TrainingSessionHandler.CreateTrainingSessionHandler)
+	http.HandleFunc("PATCH /api/trainingsession/{id}", dr.TrainingSessionHandler.UpdateTrainingSessionHandler)
+	http.HandleFunc("DELETE /api/trainingsession/{id}", dr.TrainingSessionHandler.DeleteTrainingSessionHandler)
 }

@@ -89,7 +89,7 @@ func TestUpdateDog(t *testing.T) {
 		Age:  1,
 	}
 
-	dog, err := dogService.UpdateDog(dogUpdate.ID, dogUpdate, userID)
+	dog, err := dogService.UpdateDog(dogUpdate, userID)
 	if err != nil {
 		t.Fatalf("unable to update dog at ID: %v with err: %v", dogUpdate.ID, err)
 	}
@@ -110,7 +110,7 @@ func TestUpdateDogNotFound(t *testing.T) {
 		Age:  1,
 	}
 
-	_, err := dogService.UpdateDog(dogUpdate.ID, dogUpdate, userID)
+	_, err := dogService.UpdateDog(dogUpdate, userID)
 	if err == nil {
 		t.Fatalf("expected dog not found error")
 	}

@@ -273,7 +273,7 @@ func TestRepositoryFailureUpdateDogHandler(t *testing.T) {
 		Name: "NA",
 		Age:  0,
 	}
-	r.UpdateDogFunc = func(id int, dog object.Dog) (object.Dog, error) {
+	r.UpdateDogFunc = func(dog object.Dog) (object.Dog, error) {
 		testRan = true
 		return dog, errors.New("repository update dog failure")
 	}

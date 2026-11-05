@@ -97,7 +97,8 @@ func (dh DogHandler) UpdateDogHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedDog, err := dh.DogService.UpdateDog(id, dog, userID)
+	dog.ID = id
+	updatedDog, err := dh.DogService.UpdateDog(dog, userID)
 	if err != nil {
 		errMsg := fmt.Sprintf("unable to update dog using supplied values %+v for id %v, err: %v", dog, id, err)
 		helper.ErrorResponse(http.StatusInternalServerError, errMsg, w)

@@ -20,8 +20,8 @@ func (ds DogService) CreateDog(dog object.Dog, userID int) (int, error) {
 	return ds.DogRepository.CreateDog(dog, userID)
 }
 
-func (ds DogService) UpdateDog(id int, dog object.Dog, userID int) (object.Dog, error) {
-	return ds.DogRepository.UpdateDog(id, dog, userID)
+func (ds DogService) UpdateDog(dog object.Dog, userID int) (object.Dog, error) {
+	return ds.DogRepository.UpdateDog(dog, userID)
 }
 
 func (ds DogService) DeleteDog(id int, userID int) error {

@@ -47,14 +47,6 @@ func (th TrainingSessionHandler) GetTrainingSessionByIDHandler(w http.ResponseWr
 	}
 
 	helper.SuccessResponse(http.StatusOK, session, w)
-	// w.WriteHeader(http.StatusOK)
-	// w.Header().Set("Content-Type", "application/json")
-
-	// if err := json.NewEncoder(w).Encode(session); err != nil {
-	// 	errMsg := fmt.Sprintf("unable to write training session response from session: %+v, err: %v", session, err)
-	// 	helper.ErrorResponse(http.StatusInternalServerError, errMsg, w)
-	// }
-
 }
 
 func (th TrainingSessionHandler) GetAllTrainingSessionsByDogIDHandler(w http.ResponseWriter, r *http.Request) {
@@ -107,4 +99,52 @@ func (th TrainingSessionHandler) CreateTrainingSessionHandler(w http.ResponseWri
 	}
 
 	helper.SuccessResponse(http.StatusOK, id, w)
+}
+
+func (th TrainingSessionHandler) UpdateTrainingSessionHandler(w http.ResponseWriter, r *http.Request) {
+	idString := r.PathValue("id")
+	id, err := strconv.Atoi(idString)
+	if err != nil {
+		errMsg := fmt.Sprintf("unable to convert ID: %v to integer, err: %v", idString, err)
+		helper.ErrorResponse(http.StatusBadRequest, errMsg, w)
+		return
+	}
+
+	var ts object.Training_Session
+	if err := json.NewDecoder(r.Body).Decode(&ts); err != nil {
+		errMsg := fmt.Sprintf("invalid session body for update err: %v", err)
+		helper.ErrorResponse(http.StatusBadRequest, errMsg, w)
+		return
+	}
+
+	ts.ID = id
+
+	updatedSession, err := th.TrainingService.UpdateTrainingSession(ts)
+	if err != nil {
+		errMsg := fmt.Sprintf("unable to update training session: %+v, err: %v", ts, err)
+		helper.ErrorResponse(http.StatusInternalServerError, errMsg, w)
+		return
+	}
+
+	helper.SuccessResponse(http.StatusOK, updatedSession, w)
+}
+
+func (th TrainingSessionHandler) DeleteTrainingSessionHandler(w http.ResponseWriter, r *http.Request) {
+	idString := r.PathValue("id")
+	id, err := strconv.Atoi(idString)
+	if err != nil {
+		errMsg := fmt.Sprintf("unable to convert ID: %v to integer, err: %v", idString, err)
+		helper.ErrorResponse(http.StatusBadRequest, errMsg, w)
+		return
+	}
+
+	dErr := th.TrainingService.DeleteTrainingSession(id)
+	if dErr != nil {
+		errMsg := fmt.Sprintf("error deleting training session at ID: %v, err: %v", id, err)
+		helper.ErrorResponse(http.StatusInternalServerError, errMsg, w)
+		return
+	}
+
+	successResponse := fmt.Sprintf("successful deletion of training session at ID: %v", id)
+	helper.SuccessResponse(http.StatusOK, successResponse, w)
 }
