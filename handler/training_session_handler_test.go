@@ -1,13 +1,16 @@
 package handler
 
 import (
+	"bytes"
 	"dog_tracks/helper"
 	"dog_tracks/object"
 	"dog_tracks/repository"
 	"dog_tracks/service"
 	"encoding/json"
+	"fmt"
 	"net/http/httptest"
 	"reflect"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -26,7 +29,7 @@ func TestGetTrainingSessionByIDHandler(t *testing.T) {
 		DogID:           1,
 		TrainingTypeID:  1,
 		StartedAt:       trainTime,
-		Durationseconds: 1500,
+		DurationSeconds: 1500,
 		Notes:           "dog recalled first",
 		CreatedAt:       dogTime,
 		CreatedBy:       userId,
@@ -83,7 +86,7 @@ func TestGetAllTrainingSessionsByDogIDHandler(t *testing.T) {
 			DogID:           1,
 			TrainingTypeID:  1,
 			StartedAt:       trainTime,
-			Durationseconds: 1500,
+			DurationSeconds: 1500,
 			Notes:           "dog recalled first",
 			CreatedAt:       dogTime,
 			CreatedBy:       userId,
@@ -97,7 +100,7 @@ func TestGetAllTrainingSessionsByDogIDHandler(t *testing.T) {
 			DogID:           1,
 			TrainingTypeID:  1,
 			StartedAt:       trainTime,
-			Durationseconds: 1500,
+			DurationSeconds: 1500,
 			Notes:           "dog recalled first",
 			CreatedAt:       dogTime,
 			CreatedBy:       userId,
@@ -110,20 +113,22 @@ func TestGetAllTrainingSessionsByDogIDHandler(t *testing.T) {
 
 	r.GetAllTrainingSessionsByDogIDFunc = func(id int, includeDeleted bool) ([]object.Training_Session, error) {
 		receivedID = id
-		deletedIncl := includeDeleted
+		deletedIncl = includeDeleted
 		return expectedSessions, nil
 	}
 
 	s := service.NewTrainingSessionService(r)
 	h := NewTrainingSessionHandler(s)
 
-	idString := "1"
+	idString := strconv.Itoa(receivedID)
+	deletedString := strconv.FormatBool(deletedIncl)
+	targetString := fmt.Sprintf("/api/sessions/%v/%v", idString, deletedString)
 
 	recorder := httptest.NewRecorder()
-
-	request := httptest.NewRequest("GET", "/api/sessions/1/true", nil)
+	request := httptest.NewRequest("GET", targetString, nil)
 	request.SetPathValue("id", idString)
-	request.SetPathValue("deleted", "true")
+
+	request.SetPathValue("deleted", deletedString)
 
 	h.GetAllTrainingSessionsByDogIDHandler(recorder, request)
 
@@ -142,5 +147,72 @@ func TestGetAllTrainingSessionsByDogIDHandler(t *testing.T) {
 
 	if !reflect.DeepEqual(sessions[1], expectedSessions[1]) {
 		helper.ObjectCheckFormatter(t, sessions[1], expectedSessions[1])
+	}
+}
+
+func TestCreateTrainingSessionHandler(t *testing.T) {
+	r := repository.NewTrainingSessionRepositoryFake()
+	s := service.NewTrainingSessionService(r)
+	h := NewTrainingSessionHandler(s)
+
+	expectedSession := object.Training_Session{
+		ID:              0,
+		DogID:           1,
+		TrainingTypeID:  2,
+		StartedAt:       trainTime,
+		DurationSeconds: 2000,
+		Notes:           "Notes from training creation",
+	}
+
+	recorder := httptest.NewRecorder()
+
+	tsBytes, err := json.Marshal(expectedSession)
+	if err != nil {
+		t.Fatalf("unable to marshal bytes from expected session: %+v, err: %v", expectedSession, err)
+	}
+
+	body := bytes.NewReader(tsBytes)
+
+	request := httptest.NewRequest("POST", "/api/trainingsession", body)
+
+	before := time.Now()
+	h.CreateTrainingSessionHandler(recorder, request)
+	after := time.Now()
+
+	var response struct {
+		Response int
+		Status   int
+	}
+
+	if err := json.NewDecoder(recorder.Body).Decode(&response); err != nil {
+		t.Fatalf("unable to decode request body: %+v err: %v", &request.Body, err)
+	}
+
+	sessionID := response.Response
+
+	session, err := s.GetTrainingSessionByID(sessionID, false)
+	if err != nil {
+		t.Fatalf("unable to get newly created training session at ID: %v, err: %v", sessionID, err)
+	}
+
+	if session == nil {
+		t.Fatalf("invalid session gotten for created ID: %v", sessionID)
+	}
+
+	if session.CreatedAt.Before(before) ||
+		session.CreatedAt.After(after) ||
+		session.UpdatedAt.Before(before) ||
+		session.UpdatedAt.After(after) {
+		t.Errorf("invalid creation or update times should be after %v and before %v got createdAt: %v and updatedAt: %v", after, before, session.CreatedAt, session.UpdatedAt)
+	}
+
+	expectedSession.ID = 7
+	expectedSession.CreatedAt = session.CreatedAt
+	expectedSession.UpdatedAt = session.UpdatedAt
+
+	es := &expectedSession
+
+	if !reflect.DeepEqual(session, es) {
+		helper.ObjectCheckFormatter(t, session, es)
 	}
 }

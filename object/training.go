@@ -19,7 +19,7 @@ type Training_Session struct {
 	DogID           int        `json:"dogid"`
 	TrainingTypeID  int        `json:"trainingtypeid"`
 	StartedAt       time.Time  `json:"startedat"`
-	Durationseconds int        `json:"duration"`
+	DurationSeconds int        `json:"duration"`
 	Notes           string     `json:"notes"`
 	CreatedAt       time.Time  `json:"createdat"`
 	CreatedBy       int        `json:"createdby"`

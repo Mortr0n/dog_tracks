@@ -11,7 +11,7 @@ var zeroSession = object.Training_Session{
 	DogID:           0,
 	TrainingTypeID:  0,
 	StartedAt:       time.Time{},
-	Durationseconds: 0,
+	DurationSeconds: 0,
 	Notes:           "",
 	CreatedAt:       time.Time{},
 	CreatedBy:       0,
@@ -114,7 +114,7 @@ func (ts *TrainSessionRepositoryFake) UpdateTrainingSession(session object.Train
 	}
 
 	updateSession.DogID = session.DogID
-	updateSession.Durationseconds = session.Durationseconds
+	updateSession.DurationSeconds = session.DurationSeconds
 	updateSession.Notes = session.Notes
 	updateSession.StartedAt = session.StartedAt
 	updateSession.TrainingTypeID = session.TrainingTypeID

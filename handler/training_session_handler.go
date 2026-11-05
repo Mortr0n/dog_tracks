@@ -2,6 +2,7 @@ package handler
 
 import (
 	"dog_tracks/helper"
+	"dog_tracks/object"
 	"dog_tracks/service"
 	"encoding/json"
 	"fmt"
@@ -89,4 +90,38 @@ func (th TrainingSessionHandler) GetAllTrainingSessionsByDogIDHandler(w http.Res
 		helper.ErrorResponse(http.StatusInternalServerError, errMsg, w)
 		return
 	}
+}
+
+func (th TrainingSessionHandler) CreateTrainingSessionHandler(w http.ResponseWriter, r *http.Request) {
+	var ts object.Training_Session
+	if err := json.NewDecoder(r.Body).Decode(&ts); err != nil {
+		errMsg := fmt.Sprintf("err decoding body from request err: %v", err)
+		helper.ErrorResponse(http.StatusBadRequest, errMsg, w)
+		return
+	}
+
+	id, err := th.TrainingService.CreateTrainingSession(ts)
+	if err != nil {
+		errMsg := fmt.Sprintf("unable to create training session from provided session: %+v, err: %v", ts, err)
+		helper.ErrorResponse(http.StatusInternalServerError, errMsg, w)
+		return
+	}
+
+	// session, err := th.TrainingService.GetTrainingSessionByID(id, false)
+	// if err != nil {
+	// 	errMsg := fmt.Sprintf("unable to find created training session at ID: %v, err: %v", id, err)
+	// 	helper.ErrorResponse(http.StatusInternalServerError, errMsg, w)
+	// 	return
+	// }
+
+	// if session == nil {
+	// 	errMsg := fmt.Sprintf("invalid session body returned from created ID: %v", id)
+	// 	helper.ErrorResponse(http.StatusInternalServerError, errMsg, w)
+	// 	return
+	// }
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "applicatiion/json")
+
+	helper.SuccessResponse(http.StatusOK, id, w)
 }

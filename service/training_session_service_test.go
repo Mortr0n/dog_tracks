@@ -25,7 +25,7 @@ func TestGetTrainingSessionById(t *testing.T) {
 		DogID:           1,
 		TrainingTypeID:  1,
 		StartedAt:       trainTime,
-		Durationseconds: 1500,
+		DurationSeconds: 1500,
 		Notes:           "dog recalled first",
 		CreatedAt:       dogTime,
 		CreatedBy:       userId,
@@ -75,7 +75,7 @@ func TestCreateTrainingSession(t *testing.T) {
 		DogID:           1,
 		TrainingTypeID:  1,
 		StartedAt:       trainTime,
-		Durationseconds: 1500,
+		DurationSeconds: 1500,
 		Notes:           "training session test",
 	}
 	// for updating the time stamp variables for comparison after checking
@@ -123,7 +123,7 @@ func TestUpdateTrainingSession(t *testing.T) {
 		DogID:           2,
 		TrainingTypeID:  3,
 		StartedAt:       trainTime,
-		Durationseconds: 1500,
+		DurationSeconds: 1500,
 		Notes:           "training session test",
 	}
 
@@ -157,7 +157,7 @@ func TestUpdateTrainingSessionIDNotFound(t *testing.T) {
 		DogID:           2,
 		TrainingTypeID:  3,
 		StartedAt:       trainTime,
-		Durationseconds: 1500,
+		DurationSeconds: 1500,
 		Notes:           "training session test",
 	}
 

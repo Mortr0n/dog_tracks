@@ -64,7 +64,7 @@ func TestAddDogHandler(t *testing.T) {
 
 	dogBytes, err := json.Marshal(newDog)
 	if err != nil {
-		t.Fatalf("unable to marshal dogObject %+v", newDog)
+		t.Fatalf("unable to marshal dogObject %+v, err: %v", newDog, err)
 	}
 
 	body := bytes.NewReader(dogBytes)
