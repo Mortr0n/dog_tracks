@@ -20,7 +20,7 @@ func main() {
 	trainingService := service.NewTrainingSessionService(trainingRepository)
 	th := handler.NewTrainingSessionHandler(trainingService)
 
-	dogRoute := route.NewDogRoute(dogHandler, th)
+	dogRoute := route.NewRoute(dogHandler, th)
 	dogRoute.RegisterRoutes()
 
 	fmt.Println("Server starting on port " + port)

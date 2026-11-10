@@ -10,7 +10,7 @@ type Route struct {
 	TrainingSessionHandler handler.TrainingSessionHandler
 }
 
-func NewDogRoute(d handler.DogHandler, th handler.TrainingSessionHandler) Route {
+func NewRoute(d handler.DogHandler, th handler.TrainingSessionHandler) Route {
 	return Route{
 		DogHandler:             d,
 		TrainingSessionHandler: th,
@@ -18,14 +18,14 @@ func NewDogRoute(d handler.DogHandler, th handler.TrainingSessionHandler) Route 
 }
 
 func (dr Route) RegisterRoutes() {
-	http.HandleFunc("/api/hello", dr.DogHandler.HelloHandler)
-	http.HandleFunc("GET /api/dog/{id}/{deleted}", dr.DogHandler.GetDogByIDHandler)
-	http.HandleFunc("POST /api/dog", dr.DogHandler.CreateDogHandler)
-	http.HandleFunc("PATCH /api/dog/{id}", dr.DogHandler.UpdateDogHandler)
-	http.HandleFunc("DELETE /api/dog/{id}", dr.DogHandler.DeleteDogHandler)
-	http.HandleFunc("GET /api/trainingsession/{id}/{deleted}", dr.TrainingSessionHandler.GetTrainingSessionByIDHandler)
-	http.HandleFunc("GET /api/trainingsessions/{id}/{deleted}", dr.TrainingSessionHandler.GetAllTrainingSessionsByDogIDHandler)
-	http.HandleFunc("POST /api/trainingsession", dr.TrainingSessionHandler.CreateTrainingSessionHandler)
-	http.HandleFunc("PATCH /api/trainingsession/{id}", dr.TrainingSessionHandler.UpdateTrainingSessionHandler)
-	http.HandleFunc("DELETE /api/trainingsession/{id}", dr.TrainingSessionHandler.DeleteTrainingSessionHandler)
+	http.HandleFunc("/api/hello", dr.DogHandler.Hello)
+	http.HandleFunc("GET /api/dog/{id}/{deleted}", dr.DogHandler.GetDogByID)
+	http.HandleFunc("POST /api/dog", dr.DogHandler.CreateDog)
+	http.HandleFunc("PATCH /api/dog/{id}", dr.DogHandler.UpdateDog)
+	http.HandleFunc("DELETE /api/dog/{id}", dr.DogHandler.DeleteDog)
+	http.HandleFunc("GET /api/trainingsession/{id}/{deleted}", dr.TrainingSessionHandler.GetTrainingSessionByID)
+	http.HandleFunc("GET /api/trainingsessions/{id}/{deleted}", dr.TrainingSessionHandler.GetAllTrainingSessionsByDogID)
+	http.HandleFunc("POST /api/trainingsession", dr.TrainingSessionHandler.CreateTrainingSession)
+	http.HandleFunc("PATCH /api/trainingsession/{id}", dr.TrainingSessionHandler.UpdateTrainingSession)
+	http.HandleFunc("DELETE /api/trainingsession/{id}", dr.TrainingSessionHandler.DeleteTrainingSession)
 }

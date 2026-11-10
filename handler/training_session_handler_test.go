@@ -7,6 +7,7 @@ import (
 	"dog_tracks/repository"
 	"dog_tracks/service"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -15,12 +16,12 @@ import (
 	"time"
 )
 
-var userId = 1
+var userId = 0
 var dogTime = time.Date(2026, time.October, 28, 11, 0, 0, 0, time.UTC)
 var deleteTime = time.Date(2026, time.October, 28, 3, 0, 0, 0, time.UTC)
 var trainTime = time.Date(2026, time.October, 28, 1, 0, 0, 0, time.UTC)
 
-func TestGetTrainingSessionByIDHandler(t *testing.T) {
+func TestGetTrainingSessionByID(t *testing.T) {
 	r := repository.NewTrainingSessionRepositoryFake()
 	receivedID := 0
 
@@ -53,7 +54,7 @@ func TestGetTrainingSessionByIDHandler(t *testing.T) {
 	request.SetPathValue("id", "1")
 	request.SetPathValue("deleted", "false")
 
-	h.GetTrainingSessionByIDHandler(recorder, request)
+	h.GetTrainingSessionByID(recorder, request)
 
 	expectedStatus := http.StatusOK
 	if recorder.Code != expectedStatus {
@@ -88,7 +89,7 @@ func TestGetTrainingSessionByIDHandler(t *testing.T) {
 	}
 }
 
-func TestGetAllTrainingSessionsByDogIDHandler(t *testing.T) {
+func TestGetAllTrainingSessionsByDogID(t *testing.T) {
 	r := repository.NewTrainingSessionRepositoryFake()
 	receivedID := 0
 	deletedIncl := false
@@ -143,7 +144,7 @@ func TestGetAllTrainingSessionsByDogIDHandler(t *testing.T) {
 
 	request.SetPathValue("deleted", deletedString)
 
-	h.GetAllTrainingSessionsByDogIDHandler(recorder, request)
+	h.GetAllTrainingSessionsByDogID(recorder, request)
 
 	expectedStatus := http.StatusOK
 	if recorder.Code != expectedStatus {
@@ -176,7 +177,7 @@ func TestGetAllTrainingSessionsByDogIDHandler(t *testing.T) {
 	}
 }
 
-func TestCreateTrainingSessionHandler(t *testing.T) {
+func TestCreateTrainingSession(t *testing.T) {
 	r := repository.NewTrainingSessionRepositoryFake()
 	s := service.NewTrainingSessionService(r)
 	h := NewTrainingSessionHandler(s)
@@ -202,7 +203,7 @@ func TestCreateTrainingSessionHandler(t *testing.T) {
 	request := httptest.NewRequest("POST", "/api/trainingsession", body)
 
 	before := time.Now()
-	h.CreateTrainingSessionHandler(recorder, request)
+	h.CreateTrainingSession(recorder, request)
 	after := time.Now()
 
 	expectedStatus := http.StatusOK
@@ -245,5 +246,231 @@ func TestCreateTrainingSessionHandler(t *testing.T) {
 
 	if !reflect.DeepEqual(session, es) {
 		helper.ObjectCheckFormatter(t, session, es)
+	}
+}
+
+func TestCreateTrainingSessionMalformedBody(t *testing.T) {
+	r := repository.NewTrainingSessionRepositoryFake()
+	s := service.NewTrainingSessionService(r)
+	h := NewTrainingSessionHandler(s)
+
+	recorder := httptest.NewRecorder()
+	invalidObject := `{"ID": `
+
+	body := bytes.NewReader([]byte(invalidObject))
+	request := httptest.NewRequest("POST", "/api/trainingsession/", body)
+
+	h.CreateTrainingSession(recorder, request)
+
+	var response object.ErrorResponse
+	if err := json.NewDecoder(recorder.Body).Decode(&response); err != nil {
+		t.Fatalf("unable to decode error response for training session creation malformed body err: %v", err)
+	}
+
+	expectedStatus := http.StatusBadRequest
+	if recorder.Code != expectedStatus {
+		t.Errorf("invalid http status code expected %v, got %v", expectedStatus, recorder.Code)
+	}
+
+	if response.Status != expectedStatus {
+		t.Errorf("invalid error http status code expected %v, got %v", expectedStatus, response.Status)
+	}
+
+	expectedError := "err decoding body from request err: unexpected EOF"
+	if response.Error != expectedError {
+		t.Errorf("invalid error response, expected: %v, got: %v", expectedError, response.Error)
+	}
+}
+
+func TestCreatTrainingSessionRepositoryError(t *testing.T) {
+	r := repository.NewTrainingSessionRepositoryFake()
+	testRun := false
+	r.CreateTrainingSessionFunc = func(session object.Training_Session) (int, error) {
+		testRun = true
+		return -1, errors.New("unable to store training session due to no space available")
+	}
+
+	s := service.NewTrainingSessionService(r)
+	h := NewTrainingSessionHandler(s)
+
+	testSession := object.Training_Session{
+		ID:              1,
+		DogID:           1,
+		TrainingTypeID:  1,
+		StartedAt:       trainTime,
+		DurationSeconds: 1500,
+		Notes:           "dog recalled test",
+		CreatedAt:       dogTime,
+		CreatedBy:       userId,
+		UpdatedAt:       dogTime,
+		UpdatedBy:       userId,
+		DeletedAt:       nil,
+		DeletedBy:       nil,
+	}
+
+	recorder := httptest.NewRecorder()
+
+	testSessionBytes, err := json.Marshal(testSession)
+	if err != nil {
+		t.Fatalf("unable to marshal reader bytes %v", err)
+	}
+	bodyBytesReader := bytes.NewReader(testSessionBytes)
+
+	request := httptest.NewRequest("POST", "/api/trainingsession/", bodyBytesReader)
+
+	h.CreateTrainingSession(recorder, request)
+
+	if testRun != true {
+		t.Fatalf("test func was not run")
+	}
+
+	var response object.ErrorResponse
+	if err := json.NewDecoder(recorder.Body).Decode(&response); err != nil {
+		t.Fatalf("unable to decode response for training session repository error, err: %v", err)
+	}
+
+	expectedStatus := http.StatusInternalServerError
+	if recorder.Code != expectedStatus {
+		t.Errorf("expected http status code: %v, got %v", expectedStatus, recorder.Code)
+	}
+
+	if response.Status != expectedStatus {
+		t.Errorf("expected http status code: %v, got %v", expectedStatus, response.Status)
+	}
+
+	expectedError := "unable to create training session from provided session: {ID:1 DogID:1 TrainingTypeID:1 StartedAt:2026-10-28 01:00:00 +0000 UTC DurationSeconds:1500 Notes:dog recalled test CreatedAt:2026-10-28 11:00:00 +0000 UTC CreatedBy:1 UpdatedAt:2026-10-28 11:00:00 +0000 UTC UpdatedBy:1 DeletedAt:<nil> DeletedBy:<nil>}, err: unable to store training session due to no space available"
+	if response.Error != expectedError {
+		t.Errorf("unexpected error response, expected: %v, got %v", expectedError, response.Error)
+	}
+}
+
+func TestUpdateTrainingSession(t *testing.T) {
+	r := repository.NewTrainingSessionRepositoryFake()
+	s := service.NewTrainingSessionService(r)
+	h := NewTrainingSessionHandler(s)
+
+	var newTime = time.Date(2026, time.October, 30, 11, 01, 0, 0, time.UTC)
+
+	incorrectID := -42
+
+	expectedSession := object.Training_Session{
+		ID:              2,
+		DogID:           2,
+		TrainingTypeID:  2,
+		StartedAt:       newTime,
+		DurationSeconds: 5555,
+		Notes:           "dog loose leash test",
+		UpdatedBy:       incorrectID,
+		CreatedBy:       1,
+		CreatedAt:       time.Date(2026, time.October, 28, 11, 0, 0, 0, time.UTC),
+		DeletedAt:       nil,
+		DeletedBy:       nil,
+	}
+
+	recorder := httptest.NewRecorder()
+
+	dogBytes, err := json.Marshal(expectedSession)
+	if err != nil {
+		t.Fatalf("unable to marshal dog bytes for test err: %v", err)
+	}
+
+	dogBytesReader := bytes.NewReader(dogBytes)
+
+	requestUrl := fmt.Sprintf("/api/trainingsession/%v", expectedSession.ID)
+	request := httptest.NewRequest("PATCH", requestUrl, dogBytesReader)
+	request.SetPathValue("id", "2")
+
+	before := time.Now()
+	h.UpdateTrainingSession(recorder, request)
+	after := time.Now()
+
+	type resp struct {
+		Status   int
+		Response object.Training_Session
+	}
+	var response resp
+
+	if err := json.NewDecoder(recorder.Body).Decode(&response); err != nil {
+		t.Fatalf("unable to decode response from update err: %v", err)
+	}
+
+	expectedStatus := http.StatusOK
+	if recorder.Code != expectedStatus {
+		t.Errorf("invalid http status, expected: %v got: %v", expectedStatus, recorder.Code)
+	}
+
+	if response.Status != expectedStatus {
+		t.Errorf("invalide http status, expected: %v got: %v", expectedStatus, response.Status)
+	}
+
+	us, err := s.GetTrainingSessionByID(expectedSession.ID, false)
+	if err != nil {
+		t.Fatalf("unable to get updated training session for ID: %v, err: %v", expectedSession.ID, err)
+	}
+
+	if us == nil {
+		t.Fatalf("unable to return updated session from ID: %v", expectedSession.ID)
+	}
+	updatedSession := *us
+
+	if updatedSession.UpdatedAt.Before(before) || updatedSession.UpdatedAt.After(after) {
+		t.Errorf("training session updatedAt invalid, expected before: %v and after: %v, got %v", after, before, updatedSession.UpdatedAt)
+	}
+
+	expectedSession.UpdatedBy = userId //! correcting expected userID for testing
+	expectedSession.UpdatedAt = updatedSession.UpdatedAt
+
+	if !reflect.DeepEqual(expectedSession, updatedSession) {
+		helper.ObjectCheckFormatter(t, expectedSession, updatedSession)
+	}
+
+	//
+	if !expectedSession.UpdatedAt.Equal(response.Response.UpdatedAt) {
+		t.Errorf("response updatedAt differs from expected updatedAt")
+	}
+
+	response.Response.UpdatedAt = updatedSession.UpdatedAt
+	if !reflect.DeepEqual(expectedSession, response.Response) {
+		helper.ObjectCheckFormatter(t, expectedSession, response.Response)
+	}
+}
+
+func TestUpdateTrainingSessionMalformedBody(t *testing.T) {
+	r := repository.NewTrainingSessionRepositoryFake()
+	s := service.NewTrainingSessionService(r)
+	h := NewTrainingSessionHandler(s)
+
+	recorder := httptest.NewRecorder()
+
+	badBodyString := `{"ID": `
+	badBodyBytes, err := json.Marshal(badBodyString)
+	if err != nil {
+		t.Fatalf("unable to create bytes from body string err: %v", err)
+	}
+
+	bodyBytesReader := bytes.NewReader(badBodyBytes)
+
+	request := httptest.NewRequest("PATCH", "/api/trainingsession/1/", bodyBytesReader)
+	request.SetPathValue("id", "1")
+
+	h.UpdateTrainingSession(recorder, request)
+
+	var response object.ErrorResponse
+	if err := json.NewDecoder(recorder.Body).Decode(&response); err != nil {
+		t.Fatalf("unable to decode error response err: %v", err)
+	}
+
+	expectedStatus := http.StatusBadRequest
+	if recorder.Code != expectedStatus {
+		t.Errorf("invalid http status code expected: %v, got: %v", recorder.Code, expectedStatus)
+	}
+
+	if response.Status != expectedStatus {
+		t.Errorf("invalid http status code expected: %v, got: %v", recorder.Code, expectedStatus)
+	}
+
+	expectedResponse := "invalid session body for update err: json: cannot unmarshal string into Go value of type object.Training_Session"
+	if response.Error != expectedResponse {
+		t.Errorf("invalid error response expected: %v, got: %v", expectedResponse, response.Error)
 	}
 }

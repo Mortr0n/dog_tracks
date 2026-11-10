@@ -29,7 +29,7 @@ func TestGetDogByIDHandler(t *testing.T) {
 	request := httptest.NewRequest("GET", "/api/dog/1", nil)
 	request.SetPathValue("id", "1")
 
-	handler.GetDogByIDHandler(recorder, request)
+	handler.GetDogByID(recorder, request)
 
 	if receivedID != 1 {
 		t.Errorf("expected receivedID to be 1 got %v", receivedID)
@@ -71,7 +71,7 @@ func TestAddDogHandler(t *testing.T) {
 
 	request := httptest.NewRequest("POST", "/api/dog/", body)
 
-	handler.CreateDogHandler(recorder, request)
+	handler.CreateDog(recorder, request)
 
 	// t.Logf("status: %d, body: %v", recorder.Code, recorder.Body.String())
 
@@ -112,7 +112,7 @@ func TestMalformedBodyAddDogHandler(t *testing.T) {
 
 	request := httptest.NewRequest("POST", "/api/dog/", body)
 
-	handler.CreateDogHandler(recorder, request)
+	handler.CreateDog(recorder, request)
 
 	var response object.ErrorResponse
 
@@ -160,7 +160,7 @@ func TestRepositoryFailureAddDogHandler(t *testing.T) {
 	request := httptest.NewRequest("POST", "/api/dog", body)
 	var response object.ErrorResponse
 
-	handler.CreateDogHandler(recorder, request)
+	handler.CreateDog(recorder, request)
 
 	if testRunBool != true {
 		t.Fatalf("test behavior did not run")
@@ -206,7 +206,7 @@ func TestUpdateDogHandler(t *testing.T) {
 	idString := strconv.Itoa(dogUpdate.ID)
 	request.SetPathValue("id", idString)
 
-	h.UpdateDogHandler(recorder, request)
+	h.UpdateDog(recorder, request)
 
 	if recorder.Code != http.StatusOK {
 		t.Errorf("invalid http response got %v, expected %v", recorder.Code, http.StatusOK)
@@ -244,7 +244,7 @@ func TestMalformedBodyUpdateDogHandler(t *testing.T) {
 	request := httptest.NewRequest("PATCH", "/api/dog/{id}", invalidDogReader)
 	request.SetPathValue("id", "1")
 
-	h.UpdateDogHandler(recorder, request)
+	h.UpdateDog(recorder, request)
 
 	if recorder.Code != http.StatusBadRequest {
 		t.Errorf("invalid http status code, expected %v, got %v", http.StatusInternalServerError, recorder.Code)
@@ -293,7 +293,7 @@ func TestRepositoryFailureUpdateDogHandler(t *testing.T) {
 	idInt := strconv.Itoa(dog.ID)
 	request.SetPathValue("id", idInt)
 
-	h.UpdateDogHandler(recorder, request)
+	h.UpdateDog(recorder, request)
 
 	if !testRan {
 		t.Fatalf("update dog repository failure test never ran testRan = %v", testRan)
@@ -330,7 +330,7 @@ func TestDeleteDogHandler(t *testing.T) {
 	dogIdString := strconv.Itoa(dogId)
 	request.SetPathValue("id", dogIdString)
 
-	h.DeleteDogHandler(recorder, request)
+	h.DeleteDog(recorder, request)
 
 	var response object.SuccessResponse
 	if err := json.NewDecoder(recorder.Body).Decode(&response); err != nil {

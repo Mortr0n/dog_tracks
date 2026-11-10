@@ -20,14 +20,14 @@ func NewDogHandler(ds service.DogService) DogHandler {
 	}
 }
 
-func (dh DogHandler) HelloHandler(w http.ResponseWriter, r *http.Request) {
+func (dh DogHandler) Hello(w http.ResponseWriter, r *http.Request) {
 	dogName := "Freyja"
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(dogName))
 }
 
-func (dh DogHandler) GetDogByIDHandler(w http.ResponseWriter, r *http.Request) {
+func (dh DogHandler) GetDogByID(w http.ResponseWriter, r *http.Request) {
 
 	idString := r.PathValue("id")
 	idInt, err := strconv.Atoi(idString)
@@ -58,7 +58,7 @@ func (dh DogHandler) GetDogByIDHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (dh DogHandler) CreateDogHandler(w http.ResponseWriter, r *http.Request) {
+func (dh DogHandler) CreateDog(w http.ResponseWriter, r *http.Request) {
 	var dog object.Dog
 	userID := 0
 
@@ -79,7 +79,7 @@ func (dh DogHandler) CreateDogHandler(w http.ResponseWriter, r *http.Request) {
 	helper.SuccessResponse(http.StatusOK, dog, w)
 }
 
-func (dh DogHandler) UpdateDogHandler(w http.ResponseWriter, r *http.Request) {
+func (dh DogHandler) UpdateDog(w http.ResponseWriter, r *http.Request) {
 	var dog object.Dog
 	userID := 0
 
@@ -108,7 +108,7 @@ func (dh DogHandler) UpdateDogHandler(w http.ResponseWriter, r *http.Request) {
 	helper.SuccessResponse(http.StatusOK, updatedDog, w)
 }
 
-func (dh DogHandler) DeleteDogHandler(w http.ResponseWriter, r *http.Request) {
+func (dh DogHandler) DeleteDog(w http.ResponseWriter, r *http.Request) {
 	userID := 0
 	idString := r.PathValue("id")
 	id, err := strconv.Atoi(idString)

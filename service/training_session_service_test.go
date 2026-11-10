@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-var userId = 0
+var userID = 0
 var dogTime = time.Date(2026, time.October, 28, 11, 0, 0, 0, time.UTC)
 var deleteTime = time.Date(2026, time.October, 28, 3, 0, 0, 0, time.UTC)
 var trainTime = time.Date(2026, time.October, 28, 1, 0, 0, 0, time.UTC)
@@ -28,9 +28,9 @@ func TestGetTrainingSessionById(t *testing.T) {
 		DurationSeconds: 1500,
 		Notes:           "dog recalled first",
 		CreatedAt:       dogTime,
-		CreatedBy:       userId,
+		CreatedBy:       userID,
 		UpdatedAt:       dogTime,
-		UpdatedBy:       userId,
+		UpdatedBy:       userID,
 		DeletedAt:       nil,
 		DeletedBy:       nil,
 	}

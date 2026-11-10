@@ -20,7 +20,7 @@ func NewTrainingSessionHandler(s service.TrainingService) TrainingSessionHandler
 	}
 }
 
-func (th TrainingSessionHandler) GetTrainingSessionByIDHandler(w http.ResponseWriter, r *http.Request) {
+func (th TrainingSessionHandler) GetTrainingSessionByID(w http.ResponseWriter, r *http.Request) {
 	idString := r.PathValue("id")
 	deleted := r.PathValue("deleted")
 
@@ -49,7 +49,7 @@ func (th TrainingSessionHandler) GetTrainingSessionByIDHandler(w http.ResponseWr
 	helper.SuccessResponse(http.StatusOK, session, w)
 }
 
-func (th TrainingSessionHandler) GetAllTrainingSessionsByDogIDHandler(w http.ResponseWriter, r *http.Request) {
+func (th TrainingSessionHandler) GetAllTrainingSessionsByDogID(w http.ResponseWriter, r *http.Request) {
 	idString := r.PathValue("id")
 	deleted := r.PathValue("deleted")
 
@@ -83,7 +83,7 @@ func (th TrainingSessionHandler) GetAllTrainingSessionsByDogIDHandler(w http.Res
 	}
 }
 
-func (th TrainingSessionHandler) CreateTrainingSessionHandler(w http.ResponseWriter, r *http.Request) {
+func (th TrainingSessionHandler) CreateTrainingSession(w http.ResponseWriter, r *http.Request) {
 	var ts object.Training_Session
 	if err := json.NewDecoder(r.Body).Decode(&ts); err != nil {
 		errMsg := fmt.Sprintf("err decoding body from request err: %v", err)
@@ -101,7 +101,7 @@ func (th TrainingSessionHandler) CreateTrainingSessionHandler(w http.ResponseWri
 	helper.SuccessResponse(http.StatusOK, id, w)
 }
 
-func (th TrainingSessionHandler) UpdateTrainingSessionHandler(w http.ResponseWriter, r *http.Request) {
+func (th TrainingSessionHandler) UpdateTrainingSession(w http.ResponseWriter, r *http.Request) {
 	idString := r.PathValue("id")
 	id, err := strconv.Atoi(idString)
 	if err != nil {
@@ -129,7 +129,7 @@ func (th TrainingSessionHandler) UpdateTrainingSessionHandler(w http.ResponseWri
 	helper.SuccessResponse(http.StatusOK, updatedSession, w)
 }
 
-func (th TrainingSessionHandler) DeleteTrainingSessionHandler(w http.ResponseWriter, r *http.Request) {
+func (th TrainingSessionHandler) DeleteTrainingSession(w http.ResponseWriter, r *http.Request) {
 	idString := r.PathValue("id")
 	id, err := strconv.Atoi(idString)
 	if err != nil {

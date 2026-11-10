@@ -119,6 +119,7 @@ func (ts *TrainSessionRepositoryFake) UpdateTrainingSession(session object.Train
 	updateSession.StartedAt = session.StartedAt
 	updateSession.TrainingTypeID = session.TrainingTypeID
 	updateSession.UpdatedAt = time.Now()
+	updateSession.UpdatedBy = session.UpdatedBy
 
 	ts.SessionMap[session.ID] = updateSession
 	return ts.SessionMap[session.ID], nil

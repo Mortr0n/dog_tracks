@@ -17,10 +17,15 @@ func (ds DogService) GetDogByID(id int, includeDeleted bool) (*object.Dog, error
 }
 
 func (ds DogService) CreateDog(dog object.Dog, userID int) (int, error) {
+	//TODO: place holders until service can grab an accurate user.
+	dog.CreatedBy = tempUserID
+	dog.UpdatedBy = tempUserID
 	return ds.DogRepository.CreateDog(dog, userID)
 }
 
 func (ds DogService) UpdateDog(dog object.Dog, userID int) (object.Dog, error) {
+	//TODO: place holders until service can grab an accurate user.
+	dog.UpdatedBy = tempUserID
 	return ds.DogRepository.UpdateDog(dog, userID)
 }
 

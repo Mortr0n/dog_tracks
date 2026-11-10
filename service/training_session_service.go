@@ -4,7 +4,7 @@ import (
 	"dog_tracks/object"
 )
 
-var userID = 0
+var tempUserID = 0 //TODO: place holders until service can grab an accurate user.
 
 type TrainingService struct {
 	TrainingSessionRepository TrainSessionRepositoryInterface
@@ -25,16 +25,17 @@ func (ts TrainingService) GetAllTrainingSessionsByDogID(id int, includeDeleted b
 }
 
 func (ts TrainingService) CreateTrainingSession(session object.Training_Session) (int, error) {
-	session.CreatedBy = userID
-	session.UpdatedBy = userID
+	//TODO: place holders until service can grab an accurate user.
+	session.CreatedBy = tempUserID
+	session.UpdatedBy = tempUserID
 	return ts.TrainingSessionRepository.CreateTrainingSession(session)
 }
 
 func (ts TrainingService) UpdateTrainingSession(session object.Training_Session) (object.Training_Session, error) {
-	session.UpdatedBy = userID
+	session.UpdatedBy = tempUserID //TODO: place holders until service can grab an accurate user.
 	return ts.TrainingSessionRepository.UpdateTrainingSession(session)
 }
 
 func (ts TrainingService) DeleteTrainingSession(id int) error {
-	return ts.TrainingSessionRepository.DeleteTrainingSession(id, userID)
+	return ts.TrainingSessionRepository.DeleteTrainingSession(id, tempUserID) //TODO: place holders until service can grab an accurate user.
 }

@@ -145,9 +145,9 @@ var recallTrain2 = object.Training_Session{
 	DurationSeconds: 500,
 	Notes:           "dog recalled second",
 	CreatedAt:       dogTime,
-	CreatedBy:       userId,
+	CreatedBy:       1,
 	UpdatedAt:       dogTime,
-	UpdatedBy:       userId,
+	UpdatedBy:       -42,
 	DeletedAt:       nil,
 	DeletedBy:       nil,
 }
