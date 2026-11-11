@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"dog_tracks/helper"
 	"dog_tracks/object"
 	"fmt"
 	"time"
@@ -51,11 +52,11 @@ func (ts *TrainSessionRepositoryFake) GetTrainingSessionByID(id int, includeDele
 
 	session, exists := ts.SessionMap[id]
 	if !exists {
-		return nil, fmt.Errorf("session not found at id: %v", id)
+		return nil, fmt.Errorf("session at ID %v: %w", id, helper.ErrNotFound)
 	}
 	if !includeDeleted {
 		if session.DeletedAt != nil {
-			return nil, fmt.Errorf("no non-deleted session found at ID: %v", id)
+			return nil, fmt.Errorf("non-deleted session ID %v: %w", id, helper.ErrNotFound)
 		}
 	}
 	return &session, nil
@@ -82,7 +83,7 @@ func (ts *TrainSessionRepositoryFake) GetAllTrainingSessionsByDogID(id int, incl
 	}
 
 	if len(sessions) < 1 {
-		return sessions, fmt.Errorf("no sessions found for dogID: %v", id)
+		return sessions, fmt.Errorf("sessions for Dog ID %v: %w", id, helper.ErrNotFound)
 	}
 
 	return sessions, nil
@@ -110,7 +111,7 @@ func (ts *TrainSessionRepositoryFake) UpdateTrainingSession(session object.Train
 
 	updateSession, exists := ts.SessionMap[session.ID]
 	if !exists {
-		return zeroSession, fmt.Errorf("no session at ID: %v", session.ID)
+		return zeroSession, fmt.Errorf("session at ID %v: %w", session.ID, helper.ErrNotFound)
 	}
 
 	updateSession.DogID = session.DogID
@@ -130,7 +131,7 @@ func (ts *TrainSessionRepositoryFake) DeleteTrainingSession(id int, userID int) 
 
 	session, exists := ts.SessionMap[id]
 	if !exists {
-		return fmt.Errorf("no session found at ID: %v", id)
+		return fmt.Errorf("session at ID %v: %w", id, helper.ErrNotFound)
 	}
 	now := time.Now()
 

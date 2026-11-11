@@ -4,7 +4,7 @@ import (
 	"dog_tracks/object"
 )
 
-var tempUserID = 0 //TODO: place holders until service can grab an accurate user.
+var tempUserID = 1 //TODO: place holders until service can grab an accurate user.
 
 type TrainingService struct {
 	TrainingSessionRepository TrainSessionRepositoryInterface

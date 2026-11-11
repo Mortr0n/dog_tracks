@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"dog_tracks/helper"
 	"dog_tracks/object"
 	"errors"
 	"fmt"
@@ -36,7 +37,7 @@ func (dr DogRepositoryFake) GetDogByID(id int, includeDeleted bool) (*object.Dog
 
 	dog, exists := dr.DogMap[id]
 	if !exists {
-		return nil, fmt.Errorf("Unable to find dog at id %v", id)
+		return nil, fmt.Errorf("dog at ID: %v: %w", id, helper.ErrNotFound)
 	}
 
 	returnDog := dog.DeletedAt == nil
@@ -46,7 +47,7 @@ func (dr DogRepositoryFake) GetDogByID(id int, includeDeleted bool) (*object.Dog
 	}
 
 	if !returnDog {
-		return nil, fmt.Errorf("no undeleted dogs at id")
+		return nil, fmt.Errorf("non deleted dog at ID: %v, %w", id, helper.ErrNotFound)
 	}
 
 	return &dog, nil

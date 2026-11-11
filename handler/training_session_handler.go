@@ -5,6 +5,7 @@ import (
 	"dog_tracks/object"
 	"dog_tracks/service"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -36,6 +37,9 @@ func (th TrainingSessionHandler) GetTrainingSessionByID(w http.ResponseWriter, r
 	session, err := th.TrainingService.GetTrainingSessionByID(id, includeDeleted)
 	if err != nil {
 		errMsg := fmt.Sprintf("unable to get dog by id: %v, err: %v", idString, err)
+		if errors.Is(err, helper.ErrNotFound) {
+			helper.ErrorResponse(http.StatusNotFound, errMsg, w)
+		}
 		helper.ErrorResponse(http.StatusInternalServerError, errMsg, w)
 		return
 	}
@@ -65,12 +69,11 @@ func (th TrainingSessionHandler) GetAllTrainingSessionsByDogID(w http.ResponseWr
 	sessions, err := th.TrainingService.GetAllTrainingSessionsByDogID(id, includeDeleted)
 	if err != nil {
 		errMsg := fmt.Sprintf("unable to get training sessions for dog ID: %v, err: %v", id, err)
+		if errors.Is(err, helper.ErrNotFound) {
+			helper.ErrorResponse(http.StatusNotFound, errMsg, w)
+		}
 		helper.ErrorResponse(http.StatusInternalServerError, errMsg, w)
 		return
-	}
-
-	if len(sessions) < 1 {
-		helper.SuccessResponse(http.StatusOK, sessions, w)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -122,6 +125,11 @@ func (th TrainingSessionHandler) UpdateTrainingSession(w http.ResponseWriter, r 
 	updatedSession, err := th.TrainingService.UpdateTrainingSession(ts)
 	if err != nil {
 		errMsg := fmt.Sprintf("unable to update training session: %+v, err: %v", ts, err)
+
+		if errors.Is(err, helper.ErrNotFound) {
+			helper.ErrorResponse(http.StatusNotFound, errMsg, w)
+		}
+
 		helper.ErrorResponse(http.StatusInternalServerError, errMsg, w)
 		return
 	}
@@ -141,6 +149,9 @@ func (th TrainingSessionHandler) DeleteTrainingSession(w http.ResponseWriter, r 
 	dErr := th.TrainingService.DeleteTrainingSession(id)
 	if dErr != nil {
 		errMsg := fmt.Sprintf("error deleting training session at ID: %v, err: %v", id, err)
+		if errors.Is(err, helper.ErrNotFound) {
+			helper.ErrorResponse(http.StatusNotFound, errMsg, w)
+		}
 		helper.ErrorResponse(http.StatusInternalServerError, errMsg, w)
 		return
 	}

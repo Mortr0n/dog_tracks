@@ -5,6 +5,7 @@ import (
 	"dog_tracks/object"
 	"dog_tracks/service"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -43,6 +44,10 @@ func (dh DogHandler) GetDogByID(w http.ResponseWriter, r *http.Request) {
 	dog, err := dh.DogService.GetDogByID(idInt, includeDeleted)
 	if err != nil {
 		errMsg := fmt.Sprintf("unable to get dog by id %v: err %v", idInt, err)
+		if errors.Is(err, helper.ErrNotFound) {
+			helper.ErrorResponse(http.StatusNotFound, errMsg, w)
+			return
+		}
 		helper.ErrorResponse(http.StatusInternalServerError, errMsg, w)
 		return
 	}

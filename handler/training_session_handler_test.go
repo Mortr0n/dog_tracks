@@ -12,11 +12,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strconv"
 	"testing"
 	"time"
 )
 
-var userId = 0
+var userId = 1
 var dogTime = time.Date(2026, time.October, 28, 11, 0, 0, 0, time.UTC)
 var deleteTime = time.Date(2026, time.October, 28, 3, 0, 0, 0, time.UTC)
 var trainTime = time.Date(2026, time.October, 28, 1, 0, 0, 0, time.UTC)
@@ -241,6 +242,8 @@ func TestCreateTrainingSession(t *testing.T) {
 	expectedSession.ID = 7
 	expectedSession.CreatedAt = session.CreatedAt
 	expectedSession.UpdatedAt = session.UpdatedAt
+	expectedSession.CreatedBy = 1
+	expectedSession.UpdatedBy = 1
 
 	es := &expectedSession
 
@@ -340,7 +343,7 @@ func TestCreatTrainingSessionRepositoryError(t *testing.T) {
 
 	expectedError := "unable to create training session from provided session: {ID:1 DogID:1 TrainingTypeID:1 StartedAt:2026-10-28 01:00:00 +0000 UTC DurationSeconds:1500 Notes:dog recalled test CreatedAt:2026-10-28 11:00:00 +0000 UTC CreatedBy:1 UpdatedAt:2026-10-28 11:00:00 +0000 UTC UpdatedBy:1 DeletedAt:<nil> DeletedBy:<nil>}, err: unable to store training session due to no space available"
 	if response.Error != expectedError {
-		t.Errorf("unexpected error response, expected: %v, got %v", expectedError, response.Error)
+		t.Errorf("unexpected error response, expected: %v, got: %v", expectedError, response.Error)
 	}
 }
 
@@ -472,5 +475,62 @@ func TestUpdateTrainingSessionMalformedBody(t *testing.T) {
 	expectedResponse := "invalid session body for update err: json: cannot unmarshal string into Go value of type object.Training_Session"
 	if response.Error != expectedResponse {
 		t.Errorf("invalid error response expected: %v, got: %v", expectedResponse, response.Error)
+	}
+}
+
+func TestDeleteTrainingSession(t *testing.T) {
+	r := repository.NewTrainingSessionRepositoryFake()
+	s := service.NewTrainingSessionService(r)
+	h := NewTrainingSessionHandler(s)
+
+	idToDeleteStr := "2"
+
+	recorder := httptest.NewRecorder()
+
+	requestURL := fmt.Sprintf("/api/trainingsession/%v", idToDeleteStr)
+	request := httptest.NewRequest("DELETE", requestURL, nil)
+	request.SetPathValue("id", idToDeleteStr)
+
+	h.DeleteTrainingSession(recorder, request)
+
+	var response object.SuccessResponse
+	if err := json.NewDecoder(recorder.Body).Decode(&response); err != nil {
+		t.Fatalf("error decoding response for delete err: %v", err)
+	}
+
+	if recorder.Code != http.StatusOK {
+		t.Errorf("http status expected: %v, got: %v", http.StatusOK, recorder.Code)
+	}
+
+	if response.Status != http.StatusOK {
+		t.Errorf("response status expected: %v, got: %v", http.StatusOK, response.Status)
+	}
+
+	expectedResponse := "successful deletion of training session at ID: 2"
+	if expectedResponse != response.Response {
+		t.Errorf("Expected response: %v, got: %v", expectedResponse, response.Response)
+	}
+
+	id, _ := strconv.Atoi(idToDeleteStr)
+	session, err := s.GetTrainingSessionByID(id, true)
+	if err != nil {
+		t.Fatalf("unable to retrieve deleted session at ID: %v, err: %v", id, err)
+	}
+
+	if session == nil {
+		t.Fatalf("invalid session returned")
+	}
+
+	if session.DeletedAt == nil {
+		t.Errorf("session deletedAt is nil")
+	}
+
+	if session.DeletedBy == nil {
+		t.Errorf("session deletedBy is nil")
+	}
+
+	deletedByVal := *session.DeletedBy
+	if deletedByVal != userId {
+		t.Errorf("session deletedby set incorrectly ID: %v, expected: %v", deletedByVal, userId)
 	}
 }

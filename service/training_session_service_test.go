@@ -81,6 +81,8 @@ func TestCreateTrainingSession(t *testing.T) {
 	// for updating the time stamp variables for comparison after checking
 	// they fall within expected time range for creation.
 	expectedSession := newSession
+	expectedSession.CreatedBy = tempUserID
+	expectedSession.UpdatedBy = tempUserID
 
 	before := time.Now()
 	newID, err := s.CreateTrainingSession(newSession)
@@ -128,6 +130,7 @@ func TestUpdateTrainingSession(t *testing.T) {
 	}
 
 	expectedSessionUpdate := sessionUpdate
+	expectedSessionUpdate.UpdatedBy = 1
 
 	before := time.Now()
 	updatedSession, err := s.UpdateTrainingSession(sessionUpdate)
