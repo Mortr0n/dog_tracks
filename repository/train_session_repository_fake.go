@@ -114,6 +114,10 @@ func (ts *TrainSessionRepositoryFake) UpdateTrainingSession(session object.Train
 		return zeroSession, fmt.Errorf("session at ID %v: %w", session.ID, helper.ErrNotFound)
 	}
 
+	if updateSession.DeletedAt != nil || updateSession.DeletedBy != nil {
+		return zeroSession, fmt.Errorf("session at ID %v: %w", session.ID, helper.ErrNotFound)
+	}
+
 	updateSession.DogID = session.DogID
 	updateSession.DurationSeconds = session.DurationSeconds
 	updateSession.Notes = session.Notes

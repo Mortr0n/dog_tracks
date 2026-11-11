@@ -39,6 +39,7 @@ func (th TrainingSessionHandler) GetTrainingSessionByID(w http.ResponseWriter, r
 		errMsg := fmt.Sprintf("unable to get dog by id: %v, err: %v", idString, err)
 		if errors.Is(err, helper.ErrNotFound) {
 			helper.ErrorResponse(http.StatusNotFound, errMsg, w)
+			return
 		}
 		helper.ErrorResponse(http.StatusInternalServerError, errMsg, w)
 		return
@@ -71,6 +72,7 @@ func (th TrainingSessionHandler) GetAllTrainingSessionsByDogID(w http.ResponseWr
 		errMsg := fmt.Sprintf("unable to get training sessions for dog ID: %v, err: %v", id, err)
 		if errors.Is(err, helper.ErrNotFound) {
 			helper.ErrorResponse(http.StatusNotFound, errMsg, w)
+			return
 		}
 		helper.ErrorResponse(http.StatusInternalServerError, errMsg, w)
 		return
@@ -128,6 +130,7 @@ func (th TrainingSessionHandler) UpdateTrainingSession(w http.ResponseWriter, r 
 
 		if errors.Is(err, helper.ErrNotFound) {
 			helper.ErrorResponse(http.StatusNotFound, errMsg, w)
+			return
 		}
 
 		helper.ErrorResponse(http.StatusInternalServerError, errMsg, w)

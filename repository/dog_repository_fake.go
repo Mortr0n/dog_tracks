@@ -79,14 +79,18 @@ func (dr DogRepositoryFake) UpdateDog(dog object.Dog, userId int) (object.Dog, e
 		return dr.UpdateDogFunc(dog)
 	}
 
+	emptyDog := object.Dog{ID: 0, Name: "", Age: 0}
+
 	id := dog.ID
-	_, exists := dr.DogMap[id]
+	mappedDog, exists := dr.DogMap[id]
 	if !exists {
-		errMsg := fmt.Sprintf("dog at ID: %v not found", id)
-		return object.Dog{ID: 0, Name: "", Age: 0}, errors.New(errMsg)
+		return emptyDog, fmt.Errorf("dog at ID: %v: %w", id, helper.ErrNotFound)
 	}
 
-	mappedDog := dr.DogMap[id]
+	if mappedDog.DeletedAt != nil || mappedDog.DeletedBy != nil {
+		return emptyDog, fmt.Errorf("dog at ID: %v: %w", id, helper.ErrNotFound)
+	}
+
 	mappedDog.Age = dog.Age
 	mappedDog.Name = dog.Name
 	mappedDog.UpdatedAt = time.Now()
