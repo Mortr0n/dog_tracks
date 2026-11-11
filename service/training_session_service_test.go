@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-var userID = 0
+var userID = 1
 var dogTime = time.Date(2026, time.October, 28, 11, 0, 0, 0, time.UTC)
 var deleteTime = time.Date(2026, time.October, 28, 3, 0, 0, 0, time.UTC)
 var trainTime = time.Date(2026, time.October, 28, 1, 0, 0, 0, time.UTC)
@@ -28,9 +28,9 @@ func TestGetTrainingSessionById(t *testing.T) {
 		DurationSeconds: 1500,
 		Notes:           "dog recalled first",
 		CreatedAt:       dogTime,
-		CreatedBy:       userID,
+		CreatedBy:       0,
 		UpdatedAt:       dogTime,
-		UpdatedBy:       userID,
+		UpdatedBy:       0,
 		DeletedAt:       nil,
 		DeletedBy:       nil,
 	}
@@ -169,10 +169,10 @@ func TestUpdateTrainingSessionIDNotFound(t *testing.T) {
 		t.Fatalf("unexpected successful session update updated: %v, sessionUpdating: %v", updatedSession, sessionUpdate)
 	}
 
-	expectedErrMsg := fmt.Sprintf("no session at ID: %v", sessionUpdate.ID)
+	expectedErrMsg := fmt.Sprintf("session at ID %v: record not found", sessionUpdate.ID)
 
 	if err.Error() != expectedErrMsg {
-		t.Fatalf("expected error: %v, got %v", expectedErrMsg, err.Error())
+		t.Fatalf("expected error: %v, got: %v", expectedErrMsg, err.Error())
 	}
 }
 
@@ -198,8 +198,9 @@ func TestDeleteTrainingSession(t *testing.T) {
 		t.Errorf("invalid session Deletion time deletedAt: %v", deletedSession.DeletedAt)
 	}
 
-	if *deletedSession.DeletedBy != userID {
-		t.Errorf("invalid userID for deletion ID: %v, deletedBy: %v", userID, deletedSession.DeletedBy)
+	deletedBy := *deletedSession.DeletedBy
+	if deletedBy != userID {
+		t.Errorf("invalid ID: %v, deletedBy: %v", userID, deletedBy)
 	}
 }
 
@@ -214,7 +215,7 @@ func TestDeleteTrainingSessionIDNotFound(t *testing.T) {
 		t.Fatalf("expected error for deleting ID: %v", sessionToDeleteID)
 	}
 
-	expectedErr := fmt.Sprintf("no session found at ID: %v", sessionToDeleteID)
+	expectedErr := fmt.Sprintf("session at ID %v: record not found", sessionToDeleteID)
 	if err.Error() != expectedErr {
 		t.Fatalf("err expected: %v, got: %v", expectedErr, err.Error())
 	}
